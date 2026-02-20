@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import * as authSchema from '../auth/schema';
 
 // Symbol used as the DI token — avoids magic strings when injecting the DB
 // connection elsewhere (use @Inject(DATABASE_CONNECTION) in your providers).
@@ -20,7 +21,9 @@ import { DATABASE_CONNECTION } from './database-connection';
 
         // Wraps the pool with Drizzle ORM — this is what gets injected
         // wherever DATABASE_CONNECTION is requested.
-        return drizzle(pool);
+        return drizzle(pool, {
+          schema: { ...authSchema },
+        });
       },
       inject: [ConfigService],
     },
