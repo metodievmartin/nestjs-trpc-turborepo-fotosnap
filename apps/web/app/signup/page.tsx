@@ -1,8 +1,37 @@
 'use client';
 
 import SignupForm from '@/components/auth/signup-form';
+import { SignupFormData } from '@/lib/auth/schema';
+import { authClient } from '@/lib/auth/client';
+import { getAuthErrorMessage } from '@/lib/auth/errors';
+import { useRouter } from 'next/dist/client/components/navigation';
+import { UseFormSetError } from 'react-hook-form';
 
 export default function SignupPage() {
+  const router = useRouter();
+
+  const handleSignup = async (
+    data: SignupFormData,
+    setError: UseFormSetError<SignupFormData>
+  ) => {
+    const { error: signUpError } = await authClient.signUp.email({
+      email: data.email,
+      password: data.password,
+      name: data.name,
+    });
+
+    if (signUpError) {
+      setError('root', { message: getAuthErrorMessage(signUpError.code) });
+      return;
+    }
+
+    await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+    });
+    router.push('/');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -20,7 +49,7 @@ export default function SignupPage() {
             </a>
           </p>
         </div>
-        <SignupForm onSubmit={async (data) => console.log(data)} />
+        <SignupForm onSubmit={handleSignup} />
       </div>
     </div>
   );

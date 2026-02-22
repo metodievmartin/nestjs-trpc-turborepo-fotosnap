@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormSetError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SignupFormData, signupSchema } from '@/lib/auth/schema';
 import { useState } from 'react';
@@ -18,12 +18,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 interface SignupFormProps {
-  onSubmit: (data: SignupFormData) => Promise<void>;
+  onSubmit: (
+    data: SignupFormData,
+    setError: UseFormSetError<SignupFormData>
+  ) => Promise<void>;
 }
 
 const defaultValues = {
@@ -45,7 +49,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
     try {
       setIsSubmitting(true);
-      await onSubmit(data);
+      await onSubmit(data, form.setError);
     } catch (error) {
       console.error('Error signing up:', error);
     } finally {
@@ -67,6 +71,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             onSubmit={form.handleSubmit(handleFormSubmit)}
             className="space-y-4"
           >
+            <FormRootError />
             <FormField
               name="name"
               control={form.control}
@@ -142,7 +147,11 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer mt-4"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? 'Creating account...' : 'Create account'}
             </Button>
           </form>

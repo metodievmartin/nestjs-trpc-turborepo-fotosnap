@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormSetError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
@@ -18,13 +18,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { LoginFormData, loginSchema } from '@/lib/auth/schema';
 
 interface LoginFormProps {
-  onSubmit: (data: LoginFormData) => Promise<void>;
+  onSubmit: (
+    data: LoginFormData,
+    setError: UseFormSetError<LoginFormData>
+  ) => Promise<void>;
 }
 
 const defaultValues = {
@@ -44,7 +48,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
 
     try {
       setIsSubmitting(true);
-      await onSubmit(data);
+      await onSubmit(data, form.setError);
     } catch (error) {
       console.error('Error logging in:', error);
     } finally {
@@ -65,6 +69,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
             onSubmit={form.handleSubmit(handleFormSubmit)}
             className="space-y-4"
           >
+            <FormRootError />
             <FormField
               name="email"
               control={form.control}
@@ -102,7 +107,11 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer mt-4"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
