@@ -23,6 +23,14 @@ import { DATABASE_CONNECTION } from './database/database-connection';
           // BETTER_AUTH_URL should be your API's public URL,
           // better-auth uses it to build callback and redirect URLs for OAuth flows and email links.
           baseURL: configService.get('BETTER_AUTH_URL'),
+
+          // trusted origins for OAuth flows and email links
+          trustedOrigins: [configService.getOrThrow('UI_URL')],
+
+          // explicitly enable email and password sign-in
+          emailAndPassword: {
+            enabled: true,
+          },
         }),
       }),
       // Tokens injected into useFactory in the same order as the factory params.
