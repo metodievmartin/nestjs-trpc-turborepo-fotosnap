@@ -8,6 +8,13 @@
       "when": 1771600893084,
       "tag": "0000_initial-better-auth-schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771850552189,
+      "tag": "0001_add-post-table",
+      "breakpoints": true
     }
   ]
 }
