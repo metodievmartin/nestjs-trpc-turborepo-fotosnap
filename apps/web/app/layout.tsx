@@ -1,6 +1,10 @@
+import { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+
 import './globals.css';
+
+import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -19,12 +23,19 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <ThemeProvider
+          attribute="class"
+          enableSystem
+          defaultTheme="system"
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

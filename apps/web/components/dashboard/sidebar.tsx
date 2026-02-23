@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { authClient } from '@/lib/auth/client';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export default function Sidebar() {
   const { data: session } = authClient.useSession();
@@ -35,10 +36,11 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground cursor-pointer"
               onClick={handleLogout}
               title="Sign Out"
             >
