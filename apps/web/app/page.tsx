@@ -1,3 +1,21 @@
+import Feed from '@/components/dashboard/feed';
+import Stories from '@/components/dashboard/stories';
+import Sidebar from '@/components/dashboard/sidebar';
+
 export default function Home() {
-  return <div>Home</div>;
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Stories />
+            <Feed />
+          </div>
+          <div className="lg:sticky lg:top-8 lg:h-fit">
+            <Sidebar />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
