@@ -19,11 +19,10 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "trpc:generate": "nestjs-trpc generate --entrypoint src/app.module.ts --output ../../packages/trpc/src/server",
-    "trpc:watch": "nestjs-trpc generate --entrypoint src/app.module.ts --output ../../packages/trpc/src/server --watch"
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@repo/contracts": "*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
