@@ -22,13 +22,13 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "@repo/contracts": "*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@repo/contracts": "*",
     "@thallesp/nestjs-better-auth": "^2.4.0",
-    "@trpc/server": "^11.5.0",
+    "@trpc/server": "^11.10.0",
     "better-auth": "^1.4.18",
     "drizzle-orm": "^0.45.1",
     "nestjs-trpc": "^2.9.0",
