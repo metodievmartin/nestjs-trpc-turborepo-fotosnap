@@ -13,7 +13,18 @@ import { z } from 'zod';
 
 const t = initTRPC.create();
 const publicProcedure = t.procedure;
+import { postSchema, createPostSchema } from '@repo/contracts/posts';
 
-const appRouter = t.router({});
+const appRouter = t.router({
+  posts: t.router({
+    findAll: publicProcedure
+      .output(z.array(postSchema))
+      .query(async () => 'PLACEHOLDER_DO_NOT_REMOVE' as any),
+    create: publicProcedure
+      .input(createPostSchema)
+      .output(postSchema)
+      .mutation(async () => 'PLACEHOLDER_DO_NOT_REMOVE' as any),
+  }),
+});
 
 export type AppRouter = typeof appRouter;

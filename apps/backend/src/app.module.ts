@@ -9,6 +9,8 @@ import { AuthGuard, AuthModule } from '@thallesp/nestjs-better-auth';
 
 import { DatabaseModule } from './database/database.module';
 import { DATABASE_CONNECTION } from './database/database-connection';
+import { PostsModule } from './posts/posts.module';
+import { UsersModule } from './auth/users/users.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { DATABASE_CONNECTION } from './database/database-connection';
       // Tokens injected into useFactory in the same order as the factory params.
       inject: [DATABASE_CONNECTION, ConfigService],
     }),
+    PostsModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [
