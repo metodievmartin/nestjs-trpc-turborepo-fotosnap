@@ -44,7 +44,7 @@ export class PostsService {
       .values({
         userId,
         caption: createPostInput.caption,
-        image: '',
+        image: createPostInput.image,
         likes: 0,
         createdAt: new Date(),
       })
