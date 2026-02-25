@@ -5,6 +5,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 
 import { ThemeProvider } from '@/components/theme/theme-provider';
+import TrpcProvider from '@/components/trpc/trpc-provider';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -34,7 +35,7 @@ export default function RootLayout({
           defaultTheme="system"
           disableTransitionOnChange
         >
-          {children}
+          <TrpcProvider>{children}</TrpcProvider>
         </ThemeProvider>
       </body>
     </html>

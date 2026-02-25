@@ -5,8 +5,11 @@
   "dependencies": {
     "@repo/contracts": "*"
   },
+  "exports": {
+    "./router": "./src/server/server.ts"
+  },
   "peerDependencies": {
     "zod": "^4.3.6",
-    "@trpc/server": "11.5.0"
+    "@trpc/server": "11.10.0"
   }
 }
