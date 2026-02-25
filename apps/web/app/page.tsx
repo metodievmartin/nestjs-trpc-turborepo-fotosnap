@@ -9,10 +9,13 @@ import Stories from '@/components/dashboard/stories';
 import Sidebar from '@/components/dashboard/sidebar';
 import PhotoUpload from '@/components/dashboard/photo-upload';
 
+import { trpc } from '@/lib/trpc/client';
+import { useCreatePost } from '@/hooks/use-create-post';
+
 export default function Home() {
   const [showUploadModal, setShowUploadModal] = useState(false);
-
-  const handleCreatePost = async (file: File, caption: string) => {};
+  const posts = trpc.posts.findAll.useQuery();
+  const { createPost } = useCreatePost();
 
   return (
     <div className="min-h-screen bg-background">
@@ -20,7 +23,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <Stories />
-            <Feed />
+            <Feed posts={posts.data || []} />
           </div>
           <div className="lg:sticky lg:top-8 lg:h-fit">
             <Sidebar />
@@ -31,7 +34,7 @@ export default function Home() {
       <PhotoUpload
         open={showUploadModal}
         onOpenChange={setShowUploadModal}
-        onSubmit={handleCreatePost}
+        onSubmit={createPost}
       />
       <Fab className="cursor-pointer" onClick={() => setShowUploadModal(true)}>
         <Plus className="h-6 w-6" />

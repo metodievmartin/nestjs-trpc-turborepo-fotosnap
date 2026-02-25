@@ -1,83 +1,39 @@
 'use client';
 
 import Image from 'next/image';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, User } from 'lucide-react';
+
+import { Post } from '@repo/contracts/posts';
+import { getImageUrl, getAvatarUrl } from '@/lib/media';
 
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 
-interface Post {
-  id: string;
-  user: {
-    username: string;
-    avatar: string;
-  };
-  image: string;
-  caption: string;
-  likes: number;
-  comments: number;
-  timestamp: string;
+interface FeedProps {
+  posts: Post[];
 }
 
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    user: {
-      username: 'johndoe',
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-    },
-    image:
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=600&fit=crop',
-    caption: 'Beautiful sunset at the beach 🌅',
-    likes: 142,
-    comments: 8,
-    timestamp: '2 hours ago',
-  },
-  {
-    id: '2',
-    user: {
-      username: 'janedoe',
-      avatar:
-        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=60&h=60&fit=crop&crop=faces',
-    },
-    image:
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=600&fit=crop',
-    caption: 'Coffee and code ☕️ #dev #coffee',
-    likes: 89,
-    comments: 12,
-    timestamp: '4 hours ago',
-  },
-  {
-    id: '3',
-    user: {
-      username: 'photographer',
-      avatar:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-    },
-    image:
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=600&fit=crop',
-    caption: 'Mountain adventures never get old 🏔️',
-    likes: 256,
-    comments: 23,
-    timestamp: '6 hours ago',
-  },
-];
-
-export default function Feed() {
+export default function Feed({ posts }: FeedProps) {
   return (
     <div className="space-y-6">
-      {mockPosts.map((post) => (
+      {posts.map((post) => (
         <Card key={post.id} className="overflow-hidden">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-3">
-              <Image
-                src={post.user.avatar}
-                alt={post.user.username}
-                width={64}
-                height={64}
-                className="w-8 h-8 rounded-full"
-              />
+              {getAvatarUrl(post.user.avatar) ? (
+                <Image
+                  src={getAvatarUrl(post.user.avatar)}
+                  alt={post.user.username}
+                  width={64}
+                  height={64}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                </div>
+              )}
+
               <span className="font-semibold text-sm">
                 {post.user.username}
               </span>
@@ -86,11 +42,10 @@ export default function Feed() {
 
           <div className="aspect-square relative">
             <Image
-              src={post.image}
+              src={getImageUrl(post.image)}
               alt="Post"
-              className="w-full h-full object-cover"
-              width={600}
-              height={600}
+              className="object-cover"
+              fill
             />
           </div>
 
