@@ -1,7 +1,13 @@
 import { trpc } from '@/lib/trpc/client';
 
 export function useCreatePost() {
-  const createPost = trpc.posts.create.useMutation({});
+  const utils = trpc.useUtils();
+  const createPost = trpc.posts.create.useMutation({
+    onSuccess: () => {
+      // Invalidate the findAll query cache to refetch posts
+      utils.posts.findAll.invalidate();
+    },
+  });
 
   const handleCreatePost = async (file: File, caption: string) => {
     const formData = new FormData();
