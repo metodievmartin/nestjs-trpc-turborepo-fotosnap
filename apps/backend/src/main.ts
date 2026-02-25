@@ -7,6 +7,7 @@ async function bootstrap() {
     // The nestjs-better-auth module re-adds body parsers automatically.
     bodyParser: false,
   });
+  app.setGlobalPrefix('api');
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

@@ -7,10 +7,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { AuthGuard, AuthModule } from '@thallesp/nestjs-better-auth';
 
+import { PostsModule } from './posts/posts.module';
+import { UploadModule } from './upload/upload.module';
+import { UsersModule } from './auth/users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { DATABASE_CONNECTION } from './database/database-connection';
-import { PostsModule } from './posts/posts.module';
-import { UsersModule } from './auth/users/users.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { UsersModule } from './auth/users/users.module';
     }),
     PostsModule,
     UsersModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [
