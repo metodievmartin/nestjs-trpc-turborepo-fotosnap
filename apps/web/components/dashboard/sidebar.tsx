@@ -11,6 +11,7 @@ import { getImageUrl } from '@/lib/media';
 import { authClient } from '@/lib/auth/client';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import AvatarUploadDialog from '@/components/dashboard/avatar-upload-dialog';
+import { trpc } from '@/lib/trpc/client';
 
 interface SuggestedUser {
   id: string;
@@ -60,6 +61,7 @@ const mockSuggestions: SuggestedUser[] = [
 export default function Sidebar() {
   const { data: session } = authClient.useSession();
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const utils = trpc.useUtils();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -67,7 +69,25 @@ export default function Sidebar() {
     router.push('/login');
   };
 
-  const handleAvatarUpload = async (file: File) => {};
+  const handleAvatarUpload = async (file: File) => {
+    const formData = new FormData();
+
+    formData.append('image', file);
+
+    const uploadResponse = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload avatars');
+    }
+
+    const { filename } = await uploadResponse.json();
+
+    await authClient.updateUser({ image: filename });
+    await utils.posts.findAll.refetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -80,7 +100,7 @@ export default function Sidebar() {
                 alt="Your profile"
                 width={60}
                 height={60}
-                className="w-14 h-14 rounded-full"
+                className="w-14 h-14 object-cover rounded-full"
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">

@@ -79,18 +79,20 @@ export default function AvatarUploadDialog({
 
         {!preview ? (
           <div>
-            {currentAvatar && (
-              <div className="flex justify-center">
-                <Image
-                  src={getImageUrl(currentAvatar)}
-                  alt="Current avatar"
-                  height={96}
-                  width={96}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-muted"
-                />
-              </div>
-            )}
-            <FileUploadArea onFileSelect={handleFileSelect} />
+            <div className="space-y-4">
+              {currentAvatar && (
+                <div className="flex justify-center">
+                  <Image
+                    src={getImageUrl(currentAvatar)}
+                    alt="Current avatar"
+                    height={96}
+                    width={96}
+                    className="w-24 h-24 rounded-full object-cover border-2 border-muted"
+                  />
+                </div>
+              )}
+              <FileUploadArea onFileSelect={handleFileSelect} />
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
