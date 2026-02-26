@@ -1,4 +1,8 @@
-export function getImageUrl(imagePath: string): string {
+export function getImageUrl(imagePath: string | null | undefined): string {
+  if (!imagePath) {
+    return '';
+  }
+
   return `${process.env.NEXT_PUBLIC_URL}/uploads/images/${imagePath}`;
 }
 
