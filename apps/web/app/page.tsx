@@ -7,7 +7,7 @@ import { Fab } from '@/components/ui/fab';
 import Feed from '@/components/dashboard/feed';
 import Stories from '@/components/dashboard/stories';
 import Sidebar from '@/components/dashboard/sidebar';
-import PhotoUpload from '@/components/dashboard/photo-upload';
+import PhotoUploadDialog from '@/components/dashboard/photo-upload-dialog';
 
 import { trpc } from '@/lib/trpc/client';
 import { useCreatePost } from '@/hooks/use-create-post';
@@ -31,7 +31,7 @@ export default function Home() {
         </div>
       </div>
 
-      <PhotoUpload
+      <PhotoUploadDialog
         open={showUploadModal}
         onOpenChange={setShowUploadModal}
         onSubmit={createPost}
