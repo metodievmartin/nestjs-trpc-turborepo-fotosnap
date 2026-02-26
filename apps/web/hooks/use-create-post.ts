@@ -1,4 +1,5 @@
 import { trpc } from '@/lib/trpc/client';
+import { uploadImage } from '@/lib/media';
 
 export function useCreatePost() {
   const utils = trpc.useUtils();
@@ -10,19 +11,7 @@ export function useCreatePost() {
   });
 
   const handleCreatePost = async (file: File, caption: string) => {
-    const formData = new FormData();
-    formData.append('image', file);
-
-    const uploadResponse = await fetch('/api/upload/image', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      throw new Error('Failed to upload image');
-    }
-
-    const { filename } = await uploadResponse.json();
+    const filename = await uploadImage(file);
 
     await createPost.mutateAsync({
       image: filename,

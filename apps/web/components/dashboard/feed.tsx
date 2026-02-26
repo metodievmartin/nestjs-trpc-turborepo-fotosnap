@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Heart, MessageCircle, User } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
-import { getImageUrl, getAvatarUrl } from '@/lib/media';
+import { getImageUrl } from '@/lib/media';
 
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -20,9 +20,9 @@ export default function Feed({ posts }: FeedProps) {
         <Card key={post.id} className="overflow-hidden">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-3">
-              {getAvatarUrl(post.user.avatar) ? (
+              {getImageUrl(post.user.avatar) ? (
                 <Image
-                  src={getAvatarUrl(post.user.avatar)}
+                  src={getImageUrl(post.user.avatar)}
                   alt={post.user.username}
                   width={64}
                   height={64}

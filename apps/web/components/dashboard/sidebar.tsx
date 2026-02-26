@@ -11,7 +11,7 @@ import { getImageUrl } from '@/lib/media';
 import { authClient } from '@/lib/auth/client';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import AvatarUploadDialog from '@/components/dashboard/avatar-upload-dialog';
-import { trpc } from '@/lib/trpc/client';
+import { useUpdateAvatar } from '@/hooks/use-update-avatar';
 
 interface SuggestedUser {
   id: string;
@@ -61,32 +61,12 @@ const mockSuggestions: SuggestedUser[] = [
 export default function Sidebar() {
   const { data: session } = authClient.useSession();
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const utils = trpc.useUtils();
+  const { updateAvatar } = useUpdateAvatar();
   const router = useRouter();
 
   const handleLogout = async () => {
     await authClient.signOut();
     router.push('/login');
-  };
-
-  const handleAvatarUpload = async (file: File) => {
-    const formData = new FormData();
-
-    formData.append('image', file);
-
-    const uploadResponse = await fetch('/api/upload/image', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      throw new Error('Failed to upload avatars');
-    }
-
-    const { filename } = await uploadResponse.json();
-
-    await authClient.updateUser({ image: filename });
-    await utils.posts.findAll.refetch();
   };
 
   return (
@@ -180,7 +160,7 @@ export default function Sidebar() {
       <AvatarUploadDialog
         open={showAvatarModal}
         onOpenChange={setShowAvatarModal}
-        onSubmit={handleAvatarUpload}
+        onSubmit={updateAvatar}
         currentAvatar={session?.user.image}
       />
     </div>

@@ -6,10 +6,20 @@ export function getImageUrl(imagePath: string | null | undefined): string {
   return `${process.env.NEXT_PUBLIC_URL}/uploads/images/${imagePath}`;
 }
 
-export function getAvatarUrl(avatarPath: string): string {
-  if (!avatarPath) {
-    return '';
+
+export async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await fetch('/api/upload/image', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload image');
   }
 
-  return `${process.env.NEXT_PUBLIC_URL}/uploads/images/${avatarPath}`;
+  const { filename } = await response.json();
+  return filename;
 }
