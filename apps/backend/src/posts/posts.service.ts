@@ -28,7 +28,7 @@ export class PostsService {
       id: savedPost.id,
       user: {
         username: savedPost.user.name,
-        avatar: '',
+        avatar: savedPost.user.image || '',
       },
       image: savedPost.image,
       caption: savedPost.caption,
