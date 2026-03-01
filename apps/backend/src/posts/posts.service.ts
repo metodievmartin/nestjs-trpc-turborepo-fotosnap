@@ -2,11 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreatePostInput, Post } from '@repo/contracts/posts';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { post } from './schemas/schema';
+import { like, post } from './schemas/schema';
 import { schema } from '../database/database.module';
 import { DATABASE_CONNECTION } from '../database/database-connection';
 import { UsersService } from '../auth/users/users.service';
-import { desc } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
+import { user } from '../auth/schema';
 
 @Injectable()
 export class PostsService {
@@ -16,10 +17,11 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async findAll(): Promise<Post[]> {
+  async findAll(userId: string): Promise<Post[]> {
     const posts = await this.database.query.post.findMany({
       with: {
         user: true,
+        likes: true,
       },
       orderBy: [desc(post.createdAt)],
     });
@@ -32,44 +34,37 @@ export class PostsService {
       },
       image: savedPost.image,
       caption: savedPost.caption,
-      likes: savedPost.likes,
+      likes: savedPost.likes.length,
       comments: 0,
       timestamp: savedPost.createdAt.toISOString(),
+      isLiked: savedPost.likes.some((like) => like.userId === userId),
     }));
   }
 
   async create(createPostInput: CreatePostInput, userId: string) {
-    const [newPost] = await this.database
+    await this.database
       .insert(post)
       .values({
         userId,
         caption: createPostInput.caption,
         image: createPostInput.image,
-        likes: 0,
         createdAt: new Date(),
       })
       .returning();
-
-    return this.formatPostResponse(newPost, userId);
   }
 
-  private async formatPostResponse(
-    savedPost: typeof post.$inferSelect,
-    userId: string,
-  ): Promise<Post> {
-    const userInfo = await this.usersService.findById(userId);
+  async likePost(postId: number, userId: string) {
+    const existingLike = await this.database.query.like.findFirst({
+      where: and(eq(like.postId, postId), eq(like.userId, userId)),
+    });
 
-    return {
-      id: savedPost.id,
-      user: {
-        username: userInfo.name,
-        avatar: '',
-      },
-      image: savedPost.image,
-      caption: savedPost.caption,
-      likes: savedPost.likes,
-      comments: 0,
-      timestamp: savedPost.createdAt.toISOString(),
-    };
+    if (existingLike) {
+      await this.database.delete(like).where(eq(like.id, existingLike.id));
+    } else {
+      await this.database.insert(like).values({
+        postId,
+        userId,
+      });
+    }
   }
 }

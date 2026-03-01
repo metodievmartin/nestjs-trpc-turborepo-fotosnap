@@ -15,6 +15,20 @@
       "when": 1771850552189,
       "tag": "0001_add-post-table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772483668090,
+      "tag": "0002_add-likes-table",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1772485395169,
+      "tag": "0003_remove-like-column-from-post",
+      "breakpoints": true
     }
   ]
 }
