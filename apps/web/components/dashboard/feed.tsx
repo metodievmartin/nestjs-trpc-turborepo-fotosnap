@@ -11,9 +11,11 @@ import { Button } from '../ui/button';
 
 interface FeedProps {
   posts: Post[];
+  onLikePost: (postId: number) => void;
+  isLikingPost?: (postId: number) => boolean;
 }
 
-export default function Feed({ posts }: FeedProps) {
+export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
   return (
     <div className="space-y-6">
       {posts.map((post) => (
@@ -55,10 +57,13 @@ export default function Feed({ posts }: FeedProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {}}
+                  onClick={() => onLikePost(post.id)}
+                  disabled={isLikingPost?.(post.id)}
                   className="p-0 h-auto"
                 >
-                  <Heart className="w-6 h-6 text-foreground" />
+                  <Heart
+                    className={`w-6 h-6 ${post.isLiked ? 'fill-red-500 text-red-500' : 'text-foreground'}`}
+                  />
                 </Button>
                 <Button
                   variant="ghost"
@@ -85,7 +90,7 @@ export default function Feed({ posts }: FeedProps) {
             )}
 
             <div className="text-xs text-muted-foreground uppercase">
-              {post.timestamp}
+              {new Date(post.timestamp).toLocaleDateString()}
             </div>
           </div>
         </Card>
