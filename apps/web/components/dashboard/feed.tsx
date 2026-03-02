@@ -8,6 +8,7 @@ import { getImageUrl } from '@/lib/media';
 
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
+import { formatDistanceToNow } from 'date-fns';
 
 interface FeedProps {
   posts: Post[];
@@ -89,8 +90,10 @@ export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
               </div>
             )}
 
-            <div className="text-xs text-muted-foreground uppercase">
-              {new Date(post.timestamp).toLocaleDateString()}
+            <div className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(post.timestamp), {
+                addSuffix: true,
+              })}
             </div>
           </div>
         </Card>
