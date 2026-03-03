@@ -6,6 +6,10 @@
     "./posts": {
       "types": "./src/posts/post.schema.ts",
       "default": "./src/posts/post.schema.ts"
+    },
+    "./comments": {
+      "types": "./src/comments/comment.schema.ts",
+      "default": "./src/comments/comment.schema.ts"
     }
   },
   "peerDependencies": {

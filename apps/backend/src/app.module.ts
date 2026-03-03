@@ -14,6 +14,7 @@ import { UsersModule } from './auth/users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthTrpcMiddleware } from './auth/auth-trpc.middleware';
 import { DATABASE_CONNECTION } from './database/database-connection';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { DATABASE_CONNECTION } from './database/database-connection';
     PostsModule,
     UsersModule,
     UploadModule,
+    CommentsModule,
   ],
   controllers: [],
   providers: [

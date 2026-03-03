@@ -13,9 +13,23 @@ import { z } from "zod";
 
 const t = initTRPC.create();
 const publicProcedure = t.procedure;
+import { createCommentSchema, getCommentsSchema, commentSchema, deleteCommentSchema } from "@repo/contracts/comments";
 import { postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
 
 const appRouter = t.router({
+  comments: t.router({
+    create: publicProcedure
+      .input(createCommentSchema)
+      .output(z.object({ id: z.number() }))
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    findByPostId: publicProcedure
+      .input(getCommentsSchema)
+      .output(z.array(commentSchema))
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    delete: publicProcedure
+      .input(deleteCommentSchema)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    }),
   posts: t.router({
     findAll: publicProcedure
       .output(z.array(postSchema))
