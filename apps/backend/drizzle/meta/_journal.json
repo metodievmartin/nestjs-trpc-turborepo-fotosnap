@@ -29,6 +29,13 @@
       "when": 1772485395169,
       "tag": "0003_remove-like-column-from-post",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773151747931,
+      "tag": "0004_add-comments-table",
+      "breakpoints": true
     }
   ]
 }
