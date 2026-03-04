@@ -1,6 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import { Heart, MessageCircle, User } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
@@ -8,7 +10,7 @@ import { getImageUrl } from '@/lib/media';
 
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { formatDistanceToNow } from 'date-fns';
+import PostComments from '@/components/dashboard/post-comments';
 
 interface FeedProps {
   posts: Post[];
@@ -17,15 +19,35 @@ interface FeedProps {
 }
 
 export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(
+    new Set()
+  );
+
+  const toggleComments = (postId: number) => {
+    setExpandedComments((prev) => {
+      const newSet = new Set(prev);
+
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {posts.map((post) => (
+      {posts.map((post) => {
+        const avatarUrl = getImageUrl(post.user.avatar);
+
+        return (
         <Card key={post.id} className="overflow-hidden">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-3">
-              {getImageUrl(post.user.avatar) ? (
+              {avatarUrl ? (
                 <Image
-                  src={getImageUrl(post.user.avatar)}
+                  src={avatarUrl}
                   alt={post.user.username}
                   width={64}
                   height={64}
@@ -69,10 +91,12 @@ export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {}}
+                  onClick={() => toggleComments(post.id)}
                   className="p-0 h-auto"
                 >
-                  <MessageCircle className="w-6 h-6 text-foreground" />
+                  <MessageCircle
+                    className={`w-6 h-6 ${expandedComments.has(post.id) ? 'fill-primary text-primary' : 'text-foreground'}`}
+                  />
                 </Button>
               </div>
             </div>
@@ -95,9 +119,16 @@ export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
                 addSuffix: true,
               })}
             </div>
+
+            {expandedComments.has(post.id) && (
+              <div className="pt-4 border-t">
+                <PostComments postId={post.id} />
+              </div>
+            )}
           </div>
         </Card>
-      ))}
+        );
+      })}
     </div>
   );
 }
