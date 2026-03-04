@@ -38,6 +38,7 @@ export class CommentsService {
 
     return comments.map((currentComment) => ({
       id: currentComment.id,
+      userId: currentComment.userId,
       text: currentComment.text,
       user: {
         username: currentComment.user.name,
