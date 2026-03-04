@@ -3,11 +3,11 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera, LogOut, User } from 'lucide-react';
+import { Camera, LogOut } from 'lucide-react';
 
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { getImageUrl } from '@/lib/media';
+import UserAvatar from '../ui/user-avatar';
 import { authClient } from '@/lib/auth/client';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import AvatarUploadDialog from '@/components/dashboard/avatar-upload-dialog';
@@ -74,19 +74,11 @@ export default function Sidebar() {
       <Card className="p-4">
         <div className="flex items-center space-x-3 mb-4">
           <div className="relative">
-            {session?.user.image ? (
-              <Image
-                src={getImageUrl(session?.user.image)}
-                alt="Your profile"
-                width={60}
-                height={60}
-                className="w-14 h-14 object-cover rounded-full"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <User className="w-4 h-4 text-muted-foreground" />
-              </div>
-            )}
+            <UserAvatar
+              src={session?.user.image}
+              alt="Your profile"
+              size="lg"
+            />
 
             <Button
               variant="ghost"

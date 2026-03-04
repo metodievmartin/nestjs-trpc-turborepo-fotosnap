@@ -1,15 +1,14 @@
 'use client';
 
-import Image from 'next/image';
-import { Trash2, User } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { SyntheticEvent, useState } from 'react';
 
-import { getImageUrl } from '@/lib/media';
 import { Comment } from '@repo/contracts/comments';
 
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import UserAvatar from '../ui/user-avatar';
 
 interface CommentsProps {
   comments: Comment[];
@@ -38,24 +37,13 @@ export default function Comments({
   return (
     <div className="space-y-4">
       <div className="space-y-3 max-h-64 overflow-y-auto">
-        {comments.map((comment) => {
-          const avatarUrl = getImageUrl(comment.user.avatar);
-
-          return (
+        {comments.map((comment) => (
             <div key={comment.id} className="flex items-start space-x-2">
-              {avatarUrl ? (
-                <Image
-                  src={avatarUrl}
-                  alt={comment.user.username}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 mt-2 rounded-full shrink-0"
-                />
-              ) : (
-                <div className="w-8 h-8 mt-2 rounded-full bg-muted flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                </div>
-              )}
+              <UserAvatar
+                src={comment.user.avatar}
+                alt={comment.user.username}
+                className="mt-2 shrink-0"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -82,8 +70,7 @@ export default function Comments({
                 </div>
               </div>
             </div>
-          );
-        })}
+          ))}
       </div>
 
       {comments.length === 0 && (

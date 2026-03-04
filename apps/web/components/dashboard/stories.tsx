@@ -1,8 +1,7 @@
 import Image from 'next/image';
-import { User } from 'lucide-react';
 
 import { Card } from '../ui/card';
-import { getImageUrl } from '@/lib/media';
+import UserAvatar from '../ui/user-avatar';
 import { authClient } from '@/lib/auth/client';
 
 interface Story {
@@ -53,19 +52,12 @@ export default function Stories() {
         <div className="flex flex-col items-center space-y-1 shrink-0">
           <div className="relative">
             <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200">
-              {session?.user.image ? (
-                <Image
-                  src={getImageUrl(session?.user.image)}
-                  alt="Your profile picture"
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-white"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                  <User className="w-6 h-6 text-muted-foreground" />
-                </div>
-              )}
+              <UserAvatar
+                src={session?.user.image}
+                alt="Your profile picture"
+                size="xl"
+                className="border-2 border-white"
+              />
             </div>
           </div>
           <span

@@ -3,13 +3,14 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, MessageCircle, User } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
 import { getImageUrl } from '@/lib/media';
 
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
+import UserAvatar from '../ui/user-avatar';
 import PostComments from '@/components/dashboard/post-comments';
 
 interface FeedProps {
@@ -38,26 +39,15 @@ export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
 
   return (
     <div className="space-y-6">
-      {posts.map((post) => {
-        const avatarUrl = getImageUrl(post.user.avatar);
-
-        return (
+      {posts.map((post) => (
         <Card key={post.id} className="overflow-hidden">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-3">
-              {avatarUrl ? (
-                <Image
-                  src={avatarUrl}
-                  alt={post.user.username}
-                  width={64}
-                  height={64}
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                </div>
-              )}
+              <UserAvatar
+                size="md"
+                src={post.user.avatar}
+                alt={post.user.username}
+              />
 
               <span className="font-semibold text-sm">
                 {post.user.username}
@@ -127,8 +117,7 @@ export default function Feed({ posts, onLikePost, isLikingPost }: FeedProps) {
             )}
           </div>
         </Card>
-        );
-      })}
+      ))}
     </div>
   );
 }
