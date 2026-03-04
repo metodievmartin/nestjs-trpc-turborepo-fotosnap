@@ -25,7 +25,17 @@ export function useComments(postId: number) {
   const deleteComment = trpc.comments.delete.useMutation({
     onSuccess: () => {
       utils.comments.findByPostId.invalidate({ postId });
-      utils.posts.findAll.invalidate();
+
+      utils.posts.findAll.setData(undefined, (old) => {
+        if (!old) return old;
+
+        return old.map((post) => {
+          if (post.id === postId) {
+            return { ...post, comments: Math.max(0, post.comments - 1) };
+          }
+          return post;
+        });
+      });
     },
   });
 
