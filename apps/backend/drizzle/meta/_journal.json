@@ -43,6 +43,13 @@
       "when": 1773328717739,
       "tag": "0005_add-stories-table",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773347346960,
+      "tag": "0006_add-image-to-stories-table",
+      "breakpoints": true
     }
   ]
 }
