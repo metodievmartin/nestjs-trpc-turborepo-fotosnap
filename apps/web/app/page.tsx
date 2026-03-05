@@ -9,15 +9,11 @@ import Stories from '@/components/dashboard/stories';
 import Sidebar from '@/components/dashboard/sidebar';
 import PhotoUploadDialog from '@/components/dashboard/photo-upload-dialog';
 
-import { trpc } from '@/lib/trpc/client';
 import { useCreatePost } from '@/hooks/use-create-post';
-import { useLikePost } from '@/hooks/use-like-post';
 
 export default function Home() {
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const posts = trpc.posts.findAll.useQuery();
   const { createPost } = useCreatePost();
-  const { likePost, isLikingPost } = useLikePost();
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,11 +21,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <Stories />
-            <Feed
-              posts={posts.data || []}
-              onLikePost={likePost}
-              isLikingPost={isLikingPost}
-            />
+            <Feed />
           </div>
           <div className="lg:sticky lg:top-8 lg:h-fit">
             <Sidebar />
