@@ -5,6 +5,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as authSchema from '../auth/schema';
 import * as postsSchema from '../posts/schemas/schema';
 import * as commentSchema from '../comments/schemas/schema';
+import * as storiesSchema from '../stories/schemas/schema';
 
 // Symbol used as the DI token — avoids magic strings when injecting the DB
 // connection elsewhere (use @Inject(DATABASE_CONNECTION) in your providers).
@@ -14,6 +15,7 @@ export const schema = {
   ...authSchema,
   ...postsSchema,
   ...commentSchema,
+  ...storiesSchema,
 };
 
 @Module({
