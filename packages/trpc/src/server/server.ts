@@ -15,6 +15,7 @@ const t = initTRPC.create();
 const publicProcedure = t.procedure;
 import { createCommentSchema, getCommentsSchema, commentSchema, deleteCommentSchema } from "@repo/contracts/comments";
 import { postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
+import { storyGroupSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
 
 const appRouter = t.router({
   comments: t.router({
@@ -39,6 +40,15 @@ const appRouter = t.router({
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     likePost: publicProcedure
       .input(likePostSchema)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    }),
+  stories: t.router({
+    getStories: publicProcedure
+      .output(z.array(storyGroupSchema))
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    create: publicProcedure
+      .input(createStorySchema)
+      .output(storySchema)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
     })
 });

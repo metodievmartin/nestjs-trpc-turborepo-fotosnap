@@ -10,6 +10,10 @@
     "./comments": {
       "types": "./src/comments/comment.schema.ts",
       "default": "./src/comments/comment.schema.ts"
+    },
+    "./stories": {
+      "types": "./src/stories/story.schema.ts",
+      "default": "./src/stories/story.schema.ts"
     }
   },
   "peerDependencies": {
