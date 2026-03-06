@@ -27,6 +27,7 @@ export function StoryViewer({
 }: StoryViewerProps) {
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   const currentGroup = storyGroups[currentGroupIndex];
   const currentStory = currentGroup?.stories[currentStoryIndex];
@@ -86,6 +87,7 @@ export function StoryViewer({
                 key={index}
                 state={getBarState(index)}
                 duration={STORY_DURATION_MS}
+                paused={paused}
                 onComplete={handleNext}
               />
             ))}
@@ -118,7 +120,12 @@ export function StoryViewer({
             </div>
           </div>
 
-          <div className="relative w-full h-full">
+          <div
+            className="relative w-full h-full"
+            onPointerDown={() => setPaused(true)}
+            onPointerUp={() => setPaused(false)}
+            onPointerLeave={() => setPaused(false)}
+          >
             <Image
               src={getImageUrl(currentStory.image)}
               alt="Story"
