@@ -1,3 +1,4 @@
+import React from 'react';
 import Image from 'next/image';
 import { User } from 'lucide-react';
 
@@ -11,11 +12,10 @@ const sizes = {
   xl: { container: 'w-16 h-16', icon: 'w-6 h-6', pixels: 64 },
 };
 
-interface UserAvatarProps {
+interface UserAvatarProps extends React.ComponentPropsWithoutRef<'div'> {
   src: string | null | undefined;
   alt: string;
   size?: keyof typeof sizes;
-  className?: string;
 }
 
 export default function UserAvatar({
@@ -23,31 +23,26 @@ export default function UserAvatar({
   alt,
   size = 'sm',
   className,
+  ...props
 }: UserAvatarProps) {
   const { container, icon, pixels } = sizes[size];
   const imageUrl = getImageUrl(src);
 
-  if (imageUrl) {
-    return (
-      <Image
-        src={imageUrl}
-        alt={alt}
-        width={pixels}
-        height={pixels}
-        className={cn(container, 'rounded-full object-cover', className)}
-      />
-    );
-  }
-
   return (
-    <div
-      className={cn(
-        container,
-        'rounded-full bg-muted flex items-center justify-center',
-        className
+    <div className={cn(container, 'rounded-full', className)} {...props}>
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt={alt}
+          width={pixels}
+          height={pixels}
+          className="w-full h-full rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
+          <User className={cn(icon, 'text-muted-foreground')} />
+        </div>
       )}
-    >
-      <User className={cn(icon, 'text-muted-foreground')} />
     </div>
   );
 }
