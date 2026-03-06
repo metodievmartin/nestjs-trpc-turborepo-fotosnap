@@ -1,63 +1,69 @@
-import Image from 'next/image';
+import { useState } from 'react';
+
+import { StoryGroup } from '@repo/contracts/stories';
 
 import { Card } from '../ui/card';
 import UserAvatar from '../ui/user-avatar';
 import { authClient } from '@/lib/auth/client';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import StoryUpload from '@/components/dashboard/story-upload';
+import { StoryViewer } from '@/components/dashboard/story-viewer';
 
-interface Story {
-  id: string;
-  username: string;
-  avatar: string;
+interface StoriesProps {
+  storyGroups: StoryGroup[];
+  onStoryUpload: (file: File) => Promise<void>;
 }
 
-const mockStories: Story[] = [
-  {
-    id: '1',
-    username: 'johndoe',
-    avatar:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face',
-  },
-  {
-    id: '2',
-    username: 'janedoe',
-    avatar:
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=60&h=60&fit=crop&crop=faces',
-  },
-  {
-    id: '3',
-    username: 'photographer',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face',
-  },
-  {
-    id: '4',
-    username: 'traveler',
-    avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face',
-  },
-  {
-    id: '5',
-    username: 'foodie',
-    avatar:
-      'https://images.unsplash.com/photo-1463453091185-61582044d556?w=60&h=60&fit=crop&crop=face',
-  },
-];
-
-export default function Stories() {
+export default function Stories({
+  storyGroups = [],
+  onStoryUpload,
+}: StoriesProps) {
   const { data: session } = authClient.useSession();
+  const [showCreateStory, setShowCreateStory] = useState(false);
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
+  const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
+
+  const ownStoryGroup = storyGroups.find(
+    (group) => group.userId === session?.user.id
+  );
+
+  const otherStoryGroups = storyGroups.filter(
+    (group) => group.userId !== session?.user.id
+  );
 
   return (
     <Card className="p-4">
       <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-2">
         <div className="flex flex-col items-center space-y-1 shrink-0">
           <div className="relative">
-            <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200">
-              <UserAvatar
-                src={session?.user.image}
-                alt="Your profile picture"
-                size="xl"
-                className="border-2 border-white"
-              />
+            <div
+              className={`p-0.5 rounded-full ${ownStoryGroup ? 'bg-linear-to-tr from-yellow-400 to-fuchsia-600' : 'bg-gray-200'}`}
+            >
+              <button
+                onClick={() => {
+                  if (ownStoryGroup) {
+                    setSelectedGroupIndex(0);
+                    setShowStoryViewer(true);
+                  }
+                }}
+                className="cursor-pointer"
+              >
+                <UserAvatar
+                  src={session?.user.image}
+                  alt="Your profile picture"
+                  size="xl"
+                  className="border-2 border-white"
+                />
+              </button>
+
+              <Button
+                onClick={() => setShowCreateStory(true)}
+                size="icon"
+                className="absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white cursor-pointer"
+              >
+                <Plus className="w-3 h-3" />
+              </Button>
             </div>
           </div>
           <span
@@ -68,31 +74,45 @@ export default function Stories() {
           </span>
         </div>
 
-        {mockStories.map((story) => (
+        {otherStoryGroups?.map((storyGroup, index) => (
           <div
-            key={story.id}
-            className="flex flex-col items-center space-y-1 shrink-0"
+            key={storyGroup.userId}
+            className="flex flex-col items-center space-y-1 shrink-0 cursor-pointer"
+            onClick={() => {
+              setSelectedGroupIndex(ownStoryGroup ? index + 1 : index);
+              setShowStoryViewer(true);
+            }}
           >
             <div className="relative">
-              <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200">
-                <Image
-                  src={story.avatar}
-                  alt={story.username}
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-white"
-                />
-              </div>
+              <UserAvatar
+                src={storyGroup.avatar}
+                alt={`${storyGroup.username}'s avatar`}
+                size="xl"
+                className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200"
+              />
             </div>
             <span
               className="text-xs text-center w-16 truncate"
-              title={story.username}
+              title={storyGroup.username}
             >
-              {story.username}
+              {storyGroup.username}
             </span>
           </div>
         ))}
       </div>
+
+      <StoryUpload
+        open={showCreateStory}
+        onOpenChange={setShowCreateStory}
+        onSubmit={onStoryUpload}
+      />
+
+      <StoryViewer
+        storyGroups={storyGroups}
+        initialGroupIndex={selectedGroupIndex}
+        open={showStoryViewer}
+        onOpenChange={setShowStoryViewer}
+      />
     </Card>
   );
 }
