@@ -1,24 +1,19 @@
 import { useState } from 'react';
-
-import { StoryGroup } from '@repo/contracts/stories';
+import { Plus } from 'lucide-react';
 
 import { Card } from '../ui/card';
 import UserAvatar from '../ui/user-avatar';
+import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import StoryUploadDialog from '@/components/dashboard/story-upload-dialog';
 import { StoryViewer } from '@/components/dashboard/story-viewer';
 
-interface StoriesProps {
-  storyGroups: StoryGroup[];
-  onStoryUpload: (file: File) => Promise<void>;
-}
+import { useCreateStory } from '@/hooks/use-create-story';
 
-export default function Stories({
-  storyGroups = [],
-  onStoryUpload,
-}: StoriesProps) {
+export default function Stories() {
+  const { data: storyGroups = [] } = trpc.stories.getStories.useQuery();
+  const { createStory } = useCreateStory();
   const { data: session } = authClient.useSession();
   const [showCreateStory, setShowCreateStory] = useState(false);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
@@ -104,7 +99,7 @@ export default function Stories({
       <StoryUploadDialog
         open={showCreateStory}
         onOpenChange={setShowCreateStory}
-        onSubmit={onStoryUpload}
+        onSubmit={createStory}
       />
 
       <StoryViewer
