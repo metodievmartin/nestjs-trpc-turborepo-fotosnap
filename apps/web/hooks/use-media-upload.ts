@@ -3,9 +3,10 @@ import { useRef, useState } from 'react';
 interface UseMediaUploadOptions {
   onSubmit: (file: File) => Promise<void>;
   onClose: () => void;
+  onError?: (error: unknown) => void;
 }
 
-export function useMediaUpload({ onSubmit, onClose }: UseMediaUploadOptions) {
+export function useMediaUpload({ onSubmit, onClose, onError }: UseMediaUploadOptions) {
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -14,6 +15,8 @@ export function useMediaUpload({ onSubmit, onClose }: UseMediaUploadOptions) {
   onSubmitRef.current = onSubmit;
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -37,7 +40,7 @@ export function useMediaUpload({ onSubmit, onClose }: UseMediaUploadOptions) {
       clearSelection();
       onCloseRef.current();
     } catch (err) {
-      console.error('Error uploading media', err);
+      onErrorRef.current?.(err);
     } finally {
       setIsUploading(false);
     }

@@ -27,7 +27,11 @@ export default function StoryUploadDialog({
     handleFileSelect,
     clearSelection,
     handleUpload,
-  } = useMediaUpload({ onSubmit, onClose: () => onOpenChange(false) });
+  } = useMediaUpload({
+    onSubmit,
+    onClose: () => onOpenChange(false),
+    onError: (err) => console.error('Failed to upload story', err),
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

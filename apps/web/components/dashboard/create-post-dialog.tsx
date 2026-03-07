@@ -30,6 +30,7 @@ export default function CreatePostDialog({
     useMediaUpload({
       onSubmit: (file) => onSubmit(file, caption.trim()),
       onClose: () => onOpenChange(false),
+      onError: (err) => console.error('Failed to create post', err),
     });
 
   const handleClearSelection = () => {

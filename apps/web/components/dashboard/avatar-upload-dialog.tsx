@@ -27,7 +27,11 @@ export default function AvatarUploadDialog({
   currentAvatar,
 }: AvatarUploadProps) {
   const { preview, isUploading, handleFileSelect, clearSelection, handleUpload } =
-    useMediaUpload({ onSubmit, onClose: () => onOpenChange(false) });
+    useMediaUpload({
+      onSubmit,
+      onClose: () => onOpenChange(false),
+      onError: (err) => console.error('Failed to update avatar', err),
+    });
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
