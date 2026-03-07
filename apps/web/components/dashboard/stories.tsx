@@ -7,7 +7,7 @@ import UserAvatar from '../ui/user-avatar';
 import { authClient } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import StoryUpload from '@/components/dashboard/story-upload';
+import StoryUploadDialog from '@/components/dashboard/story-upload-dialog';
 import { StoryViewer } from '@/components/dashboard/story-viewer';
 
 interface StoriesProps {
@@ -47,7 +47,7 @@ export default function Stories({
                     setShowStoryViewer(true);
                   }
                 }}
-                className="cursor-pointer"
+                className="block cursor-pointer"
               >
                 <UserAvatar
                   src={session?.user.image}
@@ -101,7 +101,7 @@ export default function Stories({
         ))}
       </div>
 
-      <StoryUpload
+      <StoryUploadDialog
         open={showCreateStory}
         onOpenChange={setShowCreateStory}
         onSubmit={onStoryUpload}
