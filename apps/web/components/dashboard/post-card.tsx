@@ -80,9 +80,12 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
 
         {post.comments > 0 && (
-          <div className="text-sm text-muted-foreground">
+          <button
+            onClick={() => setShowComments((prev) => !prev)}
+            className="text-sm text-muted-foreground cursor-pointer"
+          >
             View all {post.comments} comments
-          </div>
+          </button>
         )}
 
         <div className="text-xs text-muted-foreground">
