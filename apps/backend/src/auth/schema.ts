@@ -124,9 +124,9 @@ export const follow = pgTable(
       .notNull()
       .references(() => user.id),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.followerId, table.followingId] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.followerId, table.followingId] }),
+  ],
 );
 
 export const followRelations = relations(follow, ({ one }) => ({
