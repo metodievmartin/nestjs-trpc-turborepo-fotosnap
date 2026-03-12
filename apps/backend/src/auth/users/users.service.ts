@@ -1,10 +1,23 @@
-import { eq } from 'drizzle-orm';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
-import { user } from '../schema';
+import {
+  UserPreview,
+  UpdateProfileInput,
+  UserProfile,
+} from '@repo/contracts/users';
+
+import { follow, user } from '../schema';
+import { post } from '../../posts/schemas/schema';
 import { schema } from '../../database/database.module';
 import { DATABASE_CONNECTION } from '../../database/database-connection';
+import { isForeignKeyViolation } from '../../database/database-errors';
 
 @Injectable()
 export class UsersService {
@@ -23,5 +36,146 @@ export class UsersService {
     }
 
     return foundUser;
+  }
+
+  async follow(followerId: string, followingId: string) {
+    if (followerId === followingId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+
+    try {
+      await this.database
+        .insert(follow)
+        .values({ followerId, followingId })
+        .onConflictDoNothing();
+    } catch (e) {
+      if (isForeignKeyViolation(e)) {
+        throw new NotFoundException('User not found');
+      }
+      throw e;
+    }
+
+    return { success: true };
+  }
+
+  async unfollow(followerId: string, followingId: string) {
+    if (followerId === followingId) {
+      throw new BadRequestException('You cannot unfollow yourself');
+    }
+
+    await this.database
+      .delete(follow)
+      .where(
+        and(
+          eq(follow.followerId, followerId),
+          eq(follow.followingId, followingId),
+        ),
+      );
+
+    return { success: true };
+  }
+
+  async getFollowers(userId: string): Promise<UserPreview[]> {
+    return this.database
+      .select({
+        id: user.id,
+        name: user.name,
+        image: sql<string>`COALESCE(${user.image}, '')`,
+      })
+      .from(user)
+      .innerJoin(follow, eq(follow.followerId, user.id))
+      .where(eq(follow.followingId, userId));
+  }
+
+  async getFollowing(userId: string): Promise<UserPreview[]> {
+    return this.database
+      .select({
+        id: user.id,
+        name: user.name,
+        image: sql<string>`COALESCE(${user.image}, '')`,
+      })
+      .from(user)
+      .innerJoin(follow, eq(follow.followingId, user.id))
+      .where(eq(follow.followerId, userId));
+  }
+
+  async getSuggestedUsers(userId: string): Promise<UserPreview[]> {
+    return this.database
+      .select({
+        id: user.id,
+        name: user.name,
+        image: sql<string>`COALESCE(${user.image}, '')`,
+      })
+      .from(user)
+      .where(
+        and(
+          ne(user.id, userId),
+          notInArray(
+            user.id,
+            this.database
+              .select({ id: follow.followingId })
+              .from(follow)
+              .where(eq(follow.followerId, userId)),
+          ),
+        ),
+      )
+      .limit(5);
+  }
+
+  async getUserProfile(
+    userId: string,
+    currentUserId: string,
+  ): Promise<UserProfile> {
+    const result = await this.database
+      .select({
+        id: user.id,
+        name: user.name,
+        image: user.image,
+        bio: user.bio,
+        website: user.website,
+        followerCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${follow} f
+          WHERE f.${follow.followingId} = ${user}.${user.id}
+        )`,
+        followingCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${follow} f
+          WHERE f.${follow.followerId} = ${user}.${user.id}
+        )`,
+        postCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${post} p
+          WHERE p.${post.userId} = ${user}.${user.id}
+        )`,
+        isFollowing: sql<boolean>`EXISTS(
+          SELECT 1
+          FROM ${follow} f
+          WHERE f.${follow.followerId} = ${currentUserId}
+            AND f.${follow.followingId} = ${user}.${user.id}
+        )`,
+      })
+      .from(user)
+      .where(eq(user.id, userId));
+
+    if (!result[0]) {
+      throw new NotFoundException('User not found');
+    }
+
+    return result[0];
+  }
+
+  async updateProfile(userId: string, updates: UpdateProfileInput) {
+    const updated = await this.database
+      .update(user)
+      .set(updates)
+      .where(eq(user.id, userId))
+      .returning();
+
+    if (updated.length === 0) {
+      throw new NotFoundException('User not found');
+    }
+
+    return { success: true };
   }
 }

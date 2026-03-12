@@ -14,6 +14,10 @@
     "./stories": {
       "types": "./src/stories/story.schema.ts",
       "default": "./src/stories/story.schema.ts"
+    },
+    "./users": {
+      "types": "./src/users/user.schema.ts",
+      "default": "./src/users/user.schema.ts"
     }
   },
   "peerDependencies": {

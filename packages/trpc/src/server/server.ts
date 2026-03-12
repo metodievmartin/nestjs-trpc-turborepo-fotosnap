@@ -13,11 +13,38 @@ import { z } from "zod";
 
 const t = initTRPC.create();
 const publicProcedure = t.procedure;
+import { userIdSchema, userPreviewSchema, updateProfileSchema, userProfileSchema } from "@repo/contracts/users";
 import { createCommentSchema, getCommentsSchema, commentSchema, deleteCommentSchema } from "@repo/contracts/comments";
 import { postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
 import { storyGroupSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
 
 const appRouter = t.router({
+  users: t.router({
+    follow: publicProcedure
+      .input(userIdSchema)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    unfollow: publicProcedure
+      .input(userIdSchema)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getFollowers: publicProcedure
+      .input(userIdSchema)
+      .output(z.array(userPreviewSchema))
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getFollowing: publicProcedure
+      .input(userIdSchema)
+      .output(z.array(userPreviewSchema))
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getSuggestedUsers: publicProcedure
+      .output(z.array(userPreviewSchema))
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    updateProfile: publicProcedure
+      .input(updateProfileSchema)
+      .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getUserProfile: publicProcedure
+      .input(userIdSchema)
+      .output(userProfileSchema)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    }),
   comments: t.router({
     create: publicProcedure
       .input(createCommentSchema)
