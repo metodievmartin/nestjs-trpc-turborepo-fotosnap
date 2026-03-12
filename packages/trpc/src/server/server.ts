@@ -60,6 +60,7 @@ const appRouter = t.router({
     }),
   posts: t.router({
     findAll: publicProcedure
+      .input(findAllPostsSchema)
       .output(z.array(postSchema))
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     create: publicProcedure
