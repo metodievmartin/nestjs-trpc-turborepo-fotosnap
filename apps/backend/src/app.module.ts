@@ -13,6 +13,7 @@ import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './auth/users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthTrpcMiddleware } from './auth/auth-trpc.middleware';
+import { HttpExceptionMapperMiddleware } from './trpc/http-exception-mapper.middleware';
 import { DATABASE_CONNECTION } from './database/database-connection';
 import { CommentsModule } from './comments/comments.module';
 import { StoriesModule } from './stories/stories.module';
@@ -21,7 +22,11 @@ import { StoriesModule } from './stories/stories.module';
   imports: [
     ConfigModule.forRoot(),
     DatabaseModule,
-    TRPCModule.forRoot({ basePath: '/api/trpc', context: AppContext }),
+    TRPCModule.forRoot({
+      basePath: '/api/trpc',
+      context: AppContext,
+      globalMiddlewares: [HttpExceptionMapperMiddleware],
+    }),
     AuthModule.forRootAsync({
       imports: [DatabaseModule, ConfigModule],
       useFactory: (database: NodePgDatabase, configService: ConfigService) => ({
@@ -54,6 +59,7 @@ import { StoriesModule } from './stories/stories.module';
   controllers: [],
   providers: [
     AuthTrpcMiddleware,
+    HttpExceptionMapperMiddleware,
     AppContext,
     {
       provide: APP_GUARD,
