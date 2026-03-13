@@ -4,7 +4,7 @@ import { trpc } from '@/lib/trpc/client';
 import PostCard from './post-card';
 
 export default function Feed() {
-  const posts = trpc.posts.findAll.useQuery();
+  const posts = trpc.posts.findAll.useQuery({});
 
   return (
     <div className="space-y-6">
