@@ -7,11 +7,13 @@ import { ProfileNavigation } from '@/components/users/profile-navigation';
 import { useState } from 'react';
 import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
-import { Post } from '@repo/contracts/posts';
+import { PostModal } from '@/components/users/post-modal';
+
 
 export default function ProfilePage() {
   const params = useParams();
   const userId = params.userId as string;
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [followersFollowingModal, setFollowersFollowingModal] = useState<{
     open: boolean;
@@ -52,7 +54,11 @@ export default function ProfilePage() {
     }
   };
 
-  const handlePostClick = (post: Post) => {};
+  const selectedPost = posts.find((p) => p.id === selectedPostId) ?? null;
+
+  const handlePostClick = (post: { id: number }) => {
+    setSelectedPostId(post.id);
+  };
 
   if (isLoading) {
     return (
@@ -100,6 +106,16 @@ export default function ProfilePage() {
           onPostClick={handlePostClick}
         />
       </div>
+
+      {selectedPost && (
+        <PostModal
+          post={selectedPost}
+          open={!!selectedPostId}
+          onOpenChange={(open) => {
+            if (!open) setSelectedPostId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

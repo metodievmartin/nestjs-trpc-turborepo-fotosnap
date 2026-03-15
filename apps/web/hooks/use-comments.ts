@@ -3,39 +3,28 @@ import { trpc } from '@/lib/trpc/client';
 export function useComments(postId: number) {
   const utils = trpc.useUtils();
 
+  const updatePostCommentCount = (delta: number) => {
+    utils.posts.findById.setData({ postId }, (old) => {
+      if (!old) return old;
+      return { ...old, comments: Math.max(0, old.comments + delta) };
+    });
+  };
+
   const createComment = trpc.comments.create.useMutation({
     onSuccess: (_, variables) => {
       utils.comments.findByPostId.invalidate({
         postId: variables.postId,
       });
-
-      utils.posts.findAll.setData(undefined, (old) => {
-        if (!old) return old;
-
-        return old.map((post) => {
-          if (post.id === variables.postId) {
-            return { ...post, comments: post.comments + 1 };
-          }
-          return post;
-        });
-      });
+      updatePostCommentCount(1);
+      utils.posts.findAll.invalidate();
     },
   });
 
   const deleteComment = trpc.comments.delete.useMutation({
     onSuccess: () => {
       utils.comments.findByPostId.invalidate({ postId });
-
-      utils.posts.findAll.setData(undefined, (old) => {
-        if (!old) return old;
-
-        return old.map((post) => {
-          if (post.id === postId) {
-            return { ...post, comments: Math.max(0, post.comments - 1) };
-          }
-          return post;
-        });
-      });
+      updatePostCommentCount(-1);
+      utils.posts.findAll.invalidate();
     },
   });
 
