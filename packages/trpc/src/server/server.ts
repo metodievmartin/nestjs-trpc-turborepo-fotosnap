@@ -15,7 +15,7 @@ const t = initTRPC.create();
 const publicProcedure = t.procedure;
 import { userIdSchema, userPreviewSchema, updateProfileSchema, userProfileSchema } from "@repo/contracts/users";
 import { createCommentSchema, getCommentsSchema, commentSchema, deleteCommentSchema } from "@repo/contracts/comments";
-import { postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
+import { findAllPostsSchema, postSchema, findByIdPostSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
 import { storyGroupSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
 
 const appRouter = t.router({
@@ -62,6 +62,10 @@ const appRouter = t.router({
     findAll: publicProcedure
       .input(findAllPostsSchema)
       .output(z.array(postSchema))
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    findById: publicProcedure
+      .input(findByIdPostSchema)
+      .output(postSchema.nullable())
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     create: publicProcedure
       .input(createPostSchema)

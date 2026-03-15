@@ -41,6 +41,7 @@ export class CommentsService {
       userId: currentComment.userId,
       text: currentComment.text,
       user: {
+        id: currentComment.user.id,
         username: currentComment.user.name,
         avatar: currentComment.user.image || '',
       },

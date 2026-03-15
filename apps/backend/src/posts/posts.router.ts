@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import {
   Router,
   Mutation,
@@ -7,14 +6,18 @@ import {
   UseMiddlewares,
   Ctx,
 } from 'nestjs-trpc';
+import { z } from 'zod';
+
 import {
   postSchema,
   likePostSchema,
   createPostSchema,
   findAllPostsSchema,
+  findByIdPostSchema,
   type LikePostInput,
   type CreatePostInput,
   type FindAllPostsInput,
+  type FindByIdPostInput,
 } from '@repo/contracts/posts';
 
 import { PostsService } from './posts.service';
@@ -32,6 +35,14 @@ export class PostsRouter {
     @Input() findAllPostsInput: FindAllPostsInput,
   ) {
     return this.postsService.findAll(context.user.id, findAllPostsInput.userId);
+  }
+
+  @Query({ output: postSchema.nullable(), input: findByIdPostSchema })
+  async findById(
+    @Ctx() context: TrpcSessionContext,
+    @Input() input: FindByIdPostInput,
+  ) {
+    return this.postsService.findById(input.postId, context.user.id);
   }
 
   @Mutation({ input: createPostSchema })
