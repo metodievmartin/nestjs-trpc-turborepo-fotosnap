@@ -4,19 +4,19 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { Bookmark, Heart, MessageCircle, Send } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
-import { trpc } from '@/lib/trpc/client';
-import { authClient } from '@/lib/auth/client';
-import { useLikePost } from '@/hooks/use-like-post';
-import { useComments } from '@/hooks/use-comments';
-import { getImageUrl } from '@/lib/media';
 
-import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
+import { trpc } from '@/lib/trpc/client';
+import { getImageUrl } from '@/lib/media';
 import UserAvatar from '../ui/user-avatar';
+import { authClient } from '@/lib/auth/client';
+import PostActions from '../posts/post-actions';
+import { useComments } from '@/hooks/use-comments';
+import { useLikePost } from '@/hooks/use-like-post';
 import CommentList from '../dashboard/comment-list';
+import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import CommentForm, { CommentFormHandle } from '../dashboard/comment-form';
 
 interface PostModalProps {
@@ -32,7 +32,7 @@ export function PostModal({
 }: PostModalProps) {
   const { data: fetchedPost } = trpc.posts.findById.useQuery(
     { postId: initialPost.id },
-    { initialData: initialPost },
+    { initialData: initialPost }
   );
   const post = fetchedPost ?? initialPost;
   const { data: comments = [] } = trpc.comments.findByPostId.useQuery({
@@ -46,7 +46,10 @@ export function PostModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby={undefined} className="max-w-5xl! w-full h-[90vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-w-5xl! w-full h-[90vh] p-0 overflow-hidden flex flex-col"
+      >
         <DialogTitle className="sr-only">
           Post by {post.user.username}
         </DialogTitle>
@@ -117,43 +120,13 @@ export function PostModal({
 
             {/* Footer: actions + form */}
             <div className="border-t">
-              {/* Action icons */}
-              <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={likePost}
-                    disabled={isLiking}
-                    className="p-0 h-auto w-auto hover:opacity-60 hover:bg-transparent"
-                  >
-                    <Heart
-                      className={`size-5 ${post.isLiked ? 'fill-red-500 text-red-500' : ''}`}
-                    />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => commentFormRef.current?.focus()}
-                    className="p-0 h-auto w-auto hover:opacity-60 hover:bg-transparent"
-                  >
-                    <MessageCircle className="size-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="p-0 h-auto w-auto hover:opacity-60 hover:bg-transparent"
-                  >
-                    <Send className="size-5" />
-                  </Button>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="p-0 h-auto w-auto hover:opacity-60 hover:bg-transparent"
-                >
-                  <Bookmark className="size-5" />
-                </Button>
+              <div className="px-4 pt-3 pb-2">
+                <PostActions
+                  isLiked={post.isLiked}
+                  isLiking={isLiking}
+                  onLike={likePost}
+                  onComment={() => commentFormRef.current?.focus()}
+                />
               </div>
 
               {/* Likes count */}
@@ -174,7 +147,11 @@ export function PostModal({
 
               {/* Comment input */}
               <div className="border-t px-4 py-2">
-                <CommentForm ref={commentFormRef} onAddComment={addComment} borderless />
+                <CommentForm
+                  ref={commentFormRef}
+                  onAddComment={addComment}
+                  borderless
+                />
               </div>
             </div>
           </div>

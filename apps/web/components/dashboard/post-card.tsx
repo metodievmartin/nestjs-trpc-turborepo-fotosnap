@@ -3,15 +3,14 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Heart, MessageCircle } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
-import { getImageUrl } from '@/lib/media';
-import { useLikePost } from '@/hooks/use-like-post';
 
 import { Card } from '../ui/card';
-import { Button } from '../ui/button';
+import { getImageUrl } from '@/lib/media';
 import UserAvatar from '../ui/user-avatar';
+import PostActions from '../posts/post-actions';
+import { useLikePost } from '@/hooks/use-like-post';
 import PostComments from '@/components/dashboard/post-comments';
 
 interface PostCardProps {
@@ -46,31 +45,13 @@ export default function PostCard({ post }: PostCardProps) {
       </div>
 
       <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={likePost}
-              disabled={isLiking}
-              className="p-0 h-auto"
-            >
-              <Heart
-                className={`w-6 h-6 ${post.isLiked ? 'fill-red-500 text-red-500' : 'text-foreground'}`}
-              />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowComments((prev) => !prev)}
-              className="p-0 h-auto"
-            >
-              <MessageCircle
-                className={`w-6 h-6 ${showComments ? 'fill-primary text-primary' : 'text-foreground'}`}
-              />
-            </Button>
-          </div>
-        </div>
+        <PostActions
+          isLiked={post.isLiked}
+          isLiking={isLiking}
+          onLike={likePost}
+          onComment={() => setShowComments((prev) => !prev)}
+          commentActive={showComments}
+        />
 
         <div className="text-sm font-semibold">{post.likes} likes</div>
 
