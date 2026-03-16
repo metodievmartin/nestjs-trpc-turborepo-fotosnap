@@ -5,8 +5,8 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { StoryGroup } from '@repo/contracts/stories';
 
 import { Button } from '../ui/button';
-import UserAvatar from '../ui/user-avatar';
 import { getImageUrl } from '@/lib/media';
+import UserProfileLink from '../ui/user-profile-link';
 import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import StoryProgressBar from './story-progress-bar';
 
@@ -94,19 +94,13 @@ export function StoryViewer({
           </div>
 
           <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-between px-4 pt-2">
-            <button className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <UserAvatar
-                src={currentGroup.avatar}
-                alt={currentGroup.username}
-                size="sm"
-                className="border-2 border-white"
-              />
-              <div>
-                <div className="text-white font-semibold text-sm">
-                  {currentGroup.username}
-                </div>
-              </div>
-            </button>
+            <UserProfileLink
+              userId={currentGroup.userId}
+              username={currentGroup.username}
+              avatar={currentGroup.avatar}
+              avatarClassName="border-2 border-white"
+              className="text-white"
+            />
 
             <div className="flex items-center gap-2">
               <Button

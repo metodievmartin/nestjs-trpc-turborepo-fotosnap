@@ -1,16 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import { useRef } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 
 import { Post } from '@repo/contracts/posts';
 
-import { Button } from '../ui/button';
 import { trpc } from '@/lib/trpc/client';
 import { getImageUrl } from '@/lib/media';
 import UserAvatar from '../ui/user-avatar';
+import UserProfileLink from '../ui/user-profile-link';
 import { authClient } from '@/lib/auth/client';
 import PostActions from '../posts/post-actions';
 import { useComments } from '@/hooks/use-comments';
@@ -38,7 +38,6 @@ export function PostModal({
   const { data: comments = [] } = trpc.comments.findByPostId.useQuery({
     postId: post.id,
   });
-  const router = useRouter();
   const { data: session } = authClient.useSession();
   const { likePost, isLiking } = useLikePost(post.id);
   const { addComment, removeComment } = useComments(post.id);
@@ -69,38 +68,31 @@ export function PostModal({
           <div className="flex flex-col h-full bg-background">
             {/* Header */}
             <div className="flex items-center px-4 py-3 border-b">
-              <Button
-                variant="ghost"
-                onClick={() => router.push(`/users/${post.user.id}`)}
-                className="flex items-center gap-3 h-auto p-0 hover:bg-transparent"
-              >
-                <UserAvatar src={post.user.avatar} alt={post.user.username} />
-                <span className="font-semibold text-sm">
-                  {post.user.username}
-                </span>
-              </Button>
+              <UserProfileLink
+                userId={post.user.id}
+                username={post.user.username}
+                avatar={post.user.avatar}
+              />
             </div>
 
             {/* Scrollable: caption + comments */}
             <div className="flex-1 overflow-y-auto px-4 py-3">
               {/* Caption */}
               <div className="flex gap-3 mb-4">
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push(`/users/${post.user.id}`)}
-                  className="shrink-0 p-0 h-auto self-start hover:opacity-80 hover:bg-transparent"
+                <Link
+                  href={`/users/${post.user.id}`}
+                  className="shrink-0 self-start hover:opacity-80"
                 >
                   <UserAvatar src={post.user.avatar} alt={post.user.username} />
-                </Button>
+                </Link>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm">
-                    <Button
-                      variant="ghost"
-                      onClick={() => router.push(`/users/${post.user.id}`)}
-                      className="font-semibold text-sm p-0 h-auto mr-1 hover:opacity-80 hover:bg-transparent"
+                    <Link
+                      href={`/users/${post.user.id}`}
+                      className="font-semibold mr-1 hover:opacity-80"
                     >
                       {post.user.username}
-                    </Button>
+                    </Link>
                     {post.caption}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">

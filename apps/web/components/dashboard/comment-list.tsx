@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -24,17 +25,21 @@ export default function CommentList({
       <div className="space-y-3">
         {comments.map((comment) => (
           <div key={comment.id} className="flex items-start space-x-2">
-            <UserAvatar
-              src={comment.user.avatar}
-              alt={comment.user.username}
-              className="mt-2 shrink-0"
-            />
+            <Link href={`/users/${comment.user.id}`} className="mt-2 shrink-0 hover:opacity-80">
+              <UserAvatar
+                src={comment.user.avatar}
+                alt={comment.user.username}
+              />
+            </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <span className="font-semibold text-sm">
+                  <Link
+                    href={`/users/${comment.user.id}`}
+                    className="font-semibold text-sm hover:opacity-80"
+                  >
                     {comment.user.username}
-                  </span>
+                  </Link>
                   <p className="text-sm wrap-break-word">{comment.text}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatDistanceToNow(new Date(comment.createdAt), {

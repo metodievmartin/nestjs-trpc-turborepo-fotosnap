@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, LogOut } from 'lucide-react';
@@ -12,6 +11,7 @@ import { authClient } from '@/lib/auth/client';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import AvatarUploadDialog from '@/components/dashboard/avatar-upload-dialog';
 import { useUpdateAvatar } from '@/hooks/use-update-avatar';
+import Link from 'next/link';
 
 interface SuggestedUser {
   id: string;
@@ -91,12 +91,17 @@ export default function Sidebar() {
             </Button>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold truncate">{session?.user.email}</div>
+          <Link
+            href={`/users/${session?.user.id}`}
+            className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+          >
+            <div className="font-semibold truncate">
+              {session?.user.email}
+            </div>
             <div className="text-sm text-muted-foreground truncate">
               {session?.user.name}
             </div>
-          </div>
+          </Link>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <ThemeToggle />
             <Button
@@ -121,16 +126,17 @@ export default function Sidebar() {
 
         <div className="space-y-3">
           {mockSuggestions.map((user) => (
-            <div key={user.id} className="flex items-center space-x-3">
-              <Image
-                src={user.avatar}
-                alt={user.username}
-                className="w-8 h-8 rounded-full"
-                width={40}
-                height={40}
-              />
+            <div key={user.id} className="flex items-center gap-3">
+              <Link href={`/users/${user.id}`} className="hover:opacity-80 transition-opacity shrink-0">
+                <UserAvatar src={user.avatar} alt={user.username} />
+              </Link>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm">{user.username}</div>
+                <Link
+                  href={`/users/${user.id}`}
+                  className="font-semibold text-sm hover:opacity-80 transition-opacity"
+                >
+                  {user.username}
+                </Link>
                 {user.followedBy && (
                   <div className="text-xs text-muted-foreground">
                     Followed by {user.followedBy}

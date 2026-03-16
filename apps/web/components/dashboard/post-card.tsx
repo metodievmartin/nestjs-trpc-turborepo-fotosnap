@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
@@ -8,8 +9,8 @@ import { Post } from '@repo/contracts/posts';
 
 import { Card } from '../ui/card';
 import { getImageUrl } from '@/lib/media';
-import UserAvatar from '../ui/user-avatar';
 import PostActions from '../posts/post-actions';
+import UserProfileLink from '../ui/user-profile-link';
 import { useLikePost } from '@/hooks/use-like-post';
 import PostComments from '@/components/dashboard/post-comments';
 
@@ -24,15 +25,12 @@ export default function PostCard({ post }: PostCardProps) {
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-3">
-          <UserAvatar
-            size="md"
-            src={post.user.avatar}
-            alt={post.user.username}
-          />
-
-          <span className="font-semibold text-sm">{post.user.username}</span>
-        </div>
+        <UserProfileLink
+          userId={post.user.id}
+          username={post.user.username}
+          avatar={post.user.avatar}
+          avatarSize="md"
+        />
       </div>
 
       <div className="aspect-square relative">
@@ -56,7 +54,12 @@ export default function PostCard({ post }: PostCardProps) {
         <div className="text-sm font-semibold">{post.likes} likes</div>
 
         <div className="text-sm">
-          <span className="font-semibold">{post.user.username} </span>
+          <Link
+            href={`/users/${post.user.id}`}
+            className="font-semibold hover:opacity-80"
+          >
+            {post.user.username}{' '}
+          </Link>
           {post.caption}
         </div>
 
