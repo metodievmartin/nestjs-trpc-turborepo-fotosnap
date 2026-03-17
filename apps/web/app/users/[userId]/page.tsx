@@ -8,7 +8,8 @@ import { useState } from 'react';
 import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
 import { PostModal } from '@/components/users/post-modal';
-
+import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
+import { useUpdateProfile } from '@/hooks/use-update-profile';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -42,6 +43,12 @@ export default function ProfilePage() {
       utils.users.getUserProfile.invalidate({ userId });
     },
   });
+
+  const {
+    updateProfile,
+    isPending: isUpdateProfilePending,
+    error: updateProfileError,
+  } = useUpdateProfile(userId, () => setIsEditProfileOpen(false));
 
   const handleFollowToggle = () => {
     if (!profile) {
@@ -116,6 +123,15 @@ export default function ProfilePage() {
           }}
         />
       )}
+
+      <EditProfileModal
+        open={isEditProfileOpen}
+        onOpenChange={setIsEditProfileOpen}
+        profile={profile}
+        onSave={updateProfile}
+        isPending={isUpdateProfilePending}
+        error={updateProfileError}
+      />
     </div>
   );
 }
