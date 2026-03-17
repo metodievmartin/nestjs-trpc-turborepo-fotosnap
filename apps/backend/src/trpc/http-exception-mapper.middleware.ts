@@ -25,8 +25,21 @@ const HTTP_TO_TRPC_CODE: Record<number, TRPC_ERROR_CODE_KEY> = {
 
 @Injectable()
 export class HttpExceptionMapperMiddleware implements TRPCMiddleware {
-  async use({ next }: MiddlewareOptions): Promise<MiddlewareResponse> {
-    const result = await next();
+  async use({ next }: MiddlewareOptions): MiddlewareResponse {
+    let result: Awaited<MiddlewareResponse>;
+
+    try {
+      result = await next();
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'An unexpected error occurred',
+        cause: error,
+      });
+    }
 
     if (!result.ok) {
       const { error } = result;

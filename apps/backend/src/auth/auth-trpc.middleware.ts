@@ -25,7 +25,10 @@ export class AuthTrpcMiddleware implements TRPCMiddleware {
       });
     } catch (error) {
       this.logger.error('Failed to retrieve session', error);
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'An unexpected error occurred',
+      });
     }
 
     if (!session?.user || !session?.session) {
