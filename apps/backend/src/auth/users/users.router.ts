@@ -43,13 +43,19 @@ export class UsersRouter {
   }
 
   @Query({ input: userIdSchema, output: z.array(userPreviewSchema) })
-  async getFollowers(@Input() input: UserIdInput) {
-    return this.usersService.getFollowers(input.userId);
+  async getFollowers(
+    @Input() input: UserIdInput,
+    @Ctx() context: TrpcSessionContext,
+  ) {
+    return this.usersService.getFollowers(input.userId, context.user.id);
   }
 
   @Query({ input: userIdSchema, output: z.array(userPreviewSchema) })
-  async getFollowing(@Input() input: UserIdInput) {
-    return this.usersService.getFollowing(input.userId);
+  async getFollowing(
+    @Input() input: UserIdInput,
+    @Ctx() context: TrpcSessionContext,
+  ) {
+    return this.usersService.getFollowing(input.userId, context.user.id);
   }
 
   @Query({ output: z.array(userPreviewSchema) })

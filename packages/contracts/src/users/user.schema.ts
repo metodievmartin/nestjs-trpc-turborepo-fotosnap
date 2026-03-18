@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const userPreviewSchema = z.object({
   id: z.string(),
   name: z.string(),
-  image: z.string(),
+  image: z.string().nullable(),
+  isFollowing: z.boolean(),
 });
 
 export const userIdSchema = z.object({
@@ -11,9 +12,9 @@ export const userIdSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
-  name: z.string().optional(),
-  bio: z.string().optional(),
-  website: z.string().optional(),
+  name: z.string().min(1).max(50).optional(),
+  bio: z.string().max(150).optional(),
+  website: z.string().url().optional().or(z.literal('')),
 });
 
 export const userProfileSchema = z.object({

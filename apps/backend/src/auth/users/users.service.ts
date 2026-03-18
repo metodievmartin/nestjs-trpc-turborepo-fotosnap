@@ -8,9 +8,9 @@ import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import {
-  UserPreview,
-  UpdateProfileInput,
-  UserProfile,
+  type UserPreview,
+  type UpdateProfileInput,
+  type UserProfile,
 } from '@repo/contracts/users';
 
 import { follow, user } from '../schema';
@@ -25,6 +25,43 @@ export class UsersService {
     @Inject(DATABASE_CONNECTION)
     private readonly database: NodePgDatabase<typeof schema>,
   ) {}
+
+  private previewSelect(currentUserId: string) {
+    return {
+      id: user.id,
+      name: user.name,
+      image: user.image,
+      isFollowing: sql<boolean>`EXISTS(
+        SELECT 1
+        FROM ${follow} f
+        WHERE f.follower_id = ${currentUserId}
+          AND f.following_id = "user"."id"
+      )`,
+    };
+  }
+
+  private profileSelect(currentUserId: string) {
+    return {
+      ...this.previewSelect(currentUserId),
+      bio: user.bio,
+      website: user.website,
+      followerCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${follow} f
+        WHERE f.following_id = "user"."id"
+      )`,
+      followingCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${follow} f
+        WHERE f.follower_id = "user"."id"
+      )`,
+      postCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${post} p
+        WHERE p.user_id = "user"."id"
+      )`,
+    };
+  }
 
   async findById(userId: string): Promise<typeof user.$inferSelect> {
     const foundUser = await this.database.query.user.findFirst({
@@ -75,37 +112,31 @@ export class UsersService {
     return { success: true };
   }
 
-  async getFollowers(userId: string): Promise<UserPreview[]> {
+  async getFollowers(
+    userId: string,
+    currentUserId: string,
+  ): Promise<UserPreview[]> {
     return this.database
-      .select({
-        id: user.id,
-        name: user.name,
-        image: sql<string>`COALESCE(${user.image}, '')`,
-      })
-      .from(user)
-      .innerJoin(follow, eq(follow.followerId, user.id))
+      .select(this.previewSelect(currentUserId))
+      .from(follow)
+      .innerJoin(user, eq(follow.followerId, user.id))
       .where(eq(follow.followingId, userId));
   }
 
-  async getFollowing(userId: string): Promise<UserPreview[]> {
+  async getFollowing(
+    userId: string,
+    currentUserId: string,
+  ): Promise<UserPreview[]> {
     return this.database
-      .select({
-        id: user.id,
-        name: user.name,
-        image: sql<string>`COALESCE(${user.image}, '')`,
-      })
-      .from(user)
-      .innerJoin(follow, eq(follow.followingId, user.id))
+      .select(this.previewSelect(currentUserId))
+      .from(follow)
+      .innerJoin(user, eq(follow.followingId, user.id))
       .where(eq(follow.followerId, userId));
   }
 
   async getSuggestedUsers(userId: string): Promise<UserPreview[]> {
     return this.database
-      .select({
-        id: user.id,
-        name: user.name,
-        image: sql<string>`COALESCE(${user.image}, '')`,
-      })
+      .select(this.previewSelect(userId))
       .from(user)
       .where(
         and(
@@ -127,34 +158,7 @@ export class UsersService {
     currentUserId: string,
   ): Promise<UserProfile> {
     const result = await this.database
-      .select({
-        id: user.id,
-        name: user.name,
-        image: user.image,
-        bio: user.bio,
-        website: user.website,
-        followerCount: sql<number>`(
-          SELECT COUNT(*)::int
-          FROM ${follow} f
-          WHERE f.${follow.followingId} = ${user}.${user.id}
-        )`,
-        followingCount: sql<number>`(
-          SELECT COUNT(*)::int
-          FROM ${follow} f
-          WHERE f.${follow.followerId} = ${user}.${user.id}
-        )`,
-        postCount: sql<number>`(
-          SELECT COUNT(*)::int
-          FROM ${post} p
-          WHERE p.${post.userId} = ${user}.${user.id}
-        )`,
-        isFollowing: sql<boolean>`EXISTS(
-          SELECT 1
-          FROM ${follow} f
-          WHERE f.${follow.followerId} = ${currentUserId}
-            AND f.${follow.followingId} = ${user}.${user.id}
-        )`,
-      })
+      .select(this.profileSelect(currentUserId))
       .from(user)
       .where(eq(user.id, userId));
 
