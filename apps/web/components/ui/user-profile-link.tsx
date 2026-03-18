@@ -12,6 +12,7 @@ interface UserProfileLinkProps {
   avatarSize?: AvatarSize;
   avatarClassName?: string;
   className?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
 export default function UserProfileLink({
@@ -21,10 +22,12 @@ export default function UserProfileLink({
   avatarSize = 'sm',
   avatarClassName,
   className,
+  onClick,
 }: UserProfileLinkProps) {
   return (
     <Link
       href={`/users/${userId}`}
+      onClick={onClick}
       className={cn(
         'flex items-center gap-3 hover:opacity-80 transition-opacity',
         className
