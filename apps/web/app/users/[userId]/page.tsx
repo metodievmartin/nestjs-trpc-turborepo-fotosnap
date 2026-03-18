@@ -10,6 +10,7 @@ import { ProfileTabs } from '@/components/users/profile-tabs';
 import { PostModal } from '@/components/users/post-modal';
 import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
 import { useUpdateProfile } from '@/hooks/use-update-profile';
+import { authClient } from '@/lib/auth/client';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -24,6 +25,7 @@ export default function ProfilePage() {
     type: 'followers',
   });
   const utils = trpc.useUtils();
+  const { data: session } = authClient.useSession();
   const { data: profile, isLoading } = trpc.users.getUserProfile.useQuery({
     userId,
   });
@@ -104,6 +106,7 @@ export default function ProfilePage() {
           isFollowLoading={
             followMutation.isPending || unfollowMutation.isPending
           }
+          isOwnProfile={session?.user.id === profile.id}
         />
 
         <ProfileTabs
