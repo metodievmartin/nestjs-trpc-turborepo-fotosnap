@@ -15,7 +15,6 @@ import { PostModal } from '@/components/users/post-modal';
 import { useUpdateProfile } from '@/hooks/use-update-profile';
 import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
-import { ProfileNavigation } from '@/components/users/profile-navigation';
 import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
 
 interface FollowModalState {
@@ -60,7 +59,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="text-muted-foreground">Loading...</div>
       </div>
     );
@@ -68,41 +67,39 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">User not found</h1>
-          <p className="text-muted-foreground">This user doesn't exist</p>
+          <p className="text-muted-foreground">
+            This user doesn&apos;t exist
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <ProfileNavigation />
+    <div className="max-w-4xl mx-auto">
+      <ProfileHeader
+        profile={profile}
+        onFollowToggle={handleFollowToggle}
+        onEditProfile={() => setIsEditProfileOpen(true)}
+        onOpenFollowers={() =>
+          setFollowModal({ open: true, type: 'followers' })
+        }
+        onOpenFollowing={() =>
+          setFollowModal({ open: true, type: 'following' })
+        }
+        isFollowLoading={isFollowPending}
+        isOwnProfile={session?.user.id === profile.id}
+      />
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <ProfileHeader
-          profile={profile}
-          onFollowToggle={handleFollowToggle}
-          onEditProfile={() => setIsEditProfileOpen(true)}
-          onOpenFollowers={() =>
-            setFollowModal({ open: true, type: 'followers' })
-          }
-          onOpenFollowing={() =>
-            setFollowModal({ open: true, type: 'following' })
-          }
-          isFollowLoading={isFollowPending}
-          isOwnProfile={session?.user.id === profile.id}
-        />
-
-        <ProfileTabs
-          userPosts={posts}
-          savedPosts={[]}
-          name={profile.name}
-          onPostClick={handlePostClick}
-        />
-      </div>
+      <ProfileTabs
+        userPosts={posts}
+        savedPosts={[]}
+        name={profile.name}
+        onPostClick={handlePostClick}
+      />
 
       {selectedPost && (
         <PostModal

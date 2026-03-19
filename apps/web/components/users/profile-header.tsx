@@ -1,4 +1,4 @@
-import { Edit, Globe, Settings } from 'lucide-react';
+import { Edit, Globe, LogOut, Settings } from 'lucide-react';
 
 import { UserProfile } from '@repo/contracts/users';
 
@@ -10,6 +10,8 @@ import {
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
 import UserAvatar from '../ui/user-avatar';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { useLogout } from '@/hooks/use-logout';
 
 interface ProfileHeaderProps {
   profile: UserProfile;
@@ -30,9 +32,10 @@ export default function ProfileHeader({
   isFollowLoading,
   isOwnProfile,
 }: ProfileHeaderProps) {
+  const { logout } = useLogout();
   return (
     <div className="mb-8">
-      <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
+      <div className="flex flex-col md:flex-row gap-8 items-start md:items-center relative">
         <UserAvatar
           src={profile.image}
           alt={profile.name}
@@ -40,8 +43,14 @@ export default function ProfileHeader({
           className="shrink-0 border-2"
         />
 
+        {isOwnProfile && (
+          <div className="absolute top-0 right-0">
+            <ThemeToggle variant="ghost" />
+          </div>
+        )}
+
         <div className="flex-1 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex sm:flex-row sm:items-center gap-2">
             <h1 className="text-2xl font-normal">{profile.name}</h1>
             <div className="flex gap-2">
               {!isOwnProfile && (
@@ -57,14 +66,22 @@ export default function ProfileHeader({
               {isOwnProfile && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Settings className="h-4 w-4" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="cursor-pointer"
+                    >
+                      <Settings className="size-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={onEditProfile}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Log out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
