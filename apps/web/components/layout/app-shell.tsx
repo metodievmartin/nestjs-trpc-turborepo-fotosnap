@@ -26,7 +26,7 @@ export default function AppShell({ children }: AppShellProps) {
       <DesktopSidebar items={items} profileItem={profileItem} />
 
       <div className="md:pl-[72px] pb-16 md:pb-0">
-        <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+        <main>{children}</main>
       </div>
 
       <MobileNav items={items} profileItem={profileItem} />

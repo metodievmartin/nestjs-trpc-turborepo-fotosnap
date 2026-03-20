@@ -10,7 +10,7 @@ interface ProfileTabsProps {
   userPosts: Post[];
   savedPosts: Post[];
   name: string;
-  onPostClick: (post: Post) => void;
+  onPostClick?: (post: Post) => void;
 }
 
 export function ProfileTabs({

@@ -3,15 +3,24 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
+import { LinkIcon, ExternalLink, MoreHorizontal, User } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
 
 import { getImageUrl } from '@/lib/media';
+import { Button } from '../ui/button';
 import PostActions from '../posts/post-actions';
 import UserProfileLink from '../ui/user-profile-link';
 import { useLikePost } from '@/hooks/use-like-post';
 import PostComments from '@/components/dashboard/post-comments';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 interface PostCardProps {
   post: Post;
@@ -20,6 +29,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const { likePost, isLiking } = useLikePost(post.id);
+  const router = useRouter();
 
   return (
     <article className="border">
@@ -30,6 +40,39 @@ export default function PostCard({ post }: PostCardProps) {
           avatar={post.user.avatar}
           avatarSize="md"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer -mr-2"
+            >
+              <MoreHorizontal className="size-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/posts/${post.id}`
+                );
+              }}
+            >
+              <LinkIcon className="h-4 w-4 mr-2" />
+              Copy link
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/posts/${post.id}`)}>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open post
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => router.push(`/users/${post.user.id}`)}
+            >
+              <User className="h-4 w-4 mr-2" />
+              Go to profile
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="relative aspect-square bg-background">

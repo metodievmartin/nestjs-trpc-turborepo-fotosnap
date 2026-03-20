@@ -10,7 +10,7 @@ import { mockSuggestions } from '@/lib/mock-suggestions';
 
 export default function ExplorePage() {
   return (
-    <div className="max-w-2xl mx-auto space-y-10">
+    <div className="max-w-2xl mx-auto space-y-10 px-4 py-6">
       {/* Search bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

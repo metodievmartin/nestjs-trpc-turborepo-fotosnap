@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Edit, Globe, LogOut, Settings } from 'lucide-react';
 
 import { UserProfile } from '@repo/contracts/users';
@@ -17,8 +18,6 @@ interface ProfileHeaderProps {
   profile: UserProfile;
   onFollowToggle: () => void;
   onEditProfile: () => void;
-  onOpenFollowers: () => void;
-  onOpenFollowing: () => void;
   isFollowLoading: boolean;
   isOwnProfile: boolean;
 }
@@ -48,8 +47,6 @@ export default function ProfileHeader({
   profile,
   onFollowToggle,
   onEditProfile,
-  onOpenFollowers,
-  onOpenFollowing,
   isFollowLoading,
   isOwnProfile,
 }: ProfileHeaderProps) {
@@ -117,22 +114,20 @@ export default function ProfileHeader({
               <span className="font-semibold">{profile.postCount}</span>{' '}
               <span className="text-muted-foreground">posts</span>
             </div>
-            <Button
-              variant="ghost"
-              onClick={onOpenFollowers}
-              className="h-auto p-0"
+            <Link
+              href={`/users/${profile.id}/followers`}
+              className="hover:opacity-80"
             >
               <span className="font-semibold">{profile.followerCount}</span>{' '}
               <span className="text-muted-foreground">followers</span>
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={onOpenFollowing}
-              className="h-auto p-0"
+            </Link>
+            <Link
+              href={`/users/${profile.id}/following`}
+              className="hover:opacity-80"
             >
               <span className="font-semibold">{profile.followingCount}</span>{' '}
               <span className="text-muted-foreground">following</span>
-            </Button>
+            </Link>
           </div>
 
           <div className="hidden md:block">

@@ -6,31 +6,18 @@ import { useParams } from 'next/navigation';
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 
-import {
-  FollowersFollowingModal,
-  type FollowListType,
-} from '@/components/users/followers-following-modal';
 import { useFollowUser } from '@/hooks/use-follow-user';
-import { PostModal } from '@/components/users/post-modal';
 import { useUpdateProfile } from '@/hooks/use-update-profile';
 import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
+import { PostModal } from '@/components/users/post-modal';
 import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
-
-interface FollowModalState {
-  open: boolean;
-  type: FollowListType;
-}
 
 export default function ProfilePage() {
   const params = useParams();
   const userId = params.userId as string;
-  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [followModal, setFollowModal] = useState<FollowModalState>({
-    open: false,
-    type: 'followers',
-  });
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const { data: session } = authClient.useSession();
   const { data: posts = [] } = trpc.posts.findAll.useQuery({ userId });
   const { data: profile, isLoading } = trpc.users.getUserProfile.useQuery({
@@ -49,12 +36,6 @@ export default function ProfilePage() {
   const handleFollowToggle = () => {
     if (!profile) return;
     toggleFollow(profile.id, profile.isFollowing);
-  };
-
-  const selectedPost = posts.find((p) => p.id === selectedPostId) ?? null;
-
-  const handlePostClick = (post: { id: number }) => {
-    setSelectedPostId(post.id);
   };
 
   if (isLoading) {
@@ -79,17 +60,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 py-6">
       <ProfileHeader
         profile={profile}
         onFollowToggle={handleFollowToggle}
         onEditProfile={() => setIsEditProfileOpen(true)}
-        onOpenFollowers={() =>
-          setFollowModal({ open: true, type: 'followers' })
-        }
-        onOpenFollowing={() =>
-          setFollowModal({ open: true, type: 'following' })
-        }
         isFollowLoading={isFollowPending}
         isOwnProfile={session?.user.id === profile.id}
       />
@@ -98,12 +73,12 @@ export default function ProfilePage() {
         userPosts={posts}
         savedPosts={[]}
         name={profile.name}
-        onPostClick={handlePostClick}
+        onPostClick={(post) => setSelectedPostId(post.id)}
       />
 
-      {selectedPost && (
+      {selectedPostId && (
         <PostModal
-          post={selectedPost}
+          postId={selectedPostId}
           open={!!selectedPostId}
           onOpenChange={(open) => {
             if (!open) setSelectedPostId(null);
@@ -118,15 +93,6 @@ export default function ProfilePage() {
         onSave={updateProfile}
         isPending={isUpdateProfilePending}
         error={updateProfileError}
-      />
-
-      <FollowersFollowingModal
-        open={followModal.open}
-        onOpenChange={(open) => {
-          setFollowModal({ ...followModal, open });
-        }}
-        userId={userId}
-        type={followModal.type}
       />
     </div>
   );
