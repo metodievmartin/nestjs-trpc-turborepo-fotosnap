@@ -14,12 +14,12 @@ interface PostGridProps {
 
 export function PostsGrid({ posts, onPostClick }: PostGridProps) {
   return (
-    <div className="grid grid-cols-3 gap-1 md:gap-4">
+    <div className="grid grid-cols-3 gap-0.5 md:gap-1">
       {posts.map((post) => (
         <div
           key={post.id}
           onClick={() => onPostClick(post)}
-          className="aspect-square relative group cursor-pointer overflow-hidden rounded-sm"
+          className="aspect-square relative group cursor-pointer overflow-hidden"
         >
           <Image
             src={getImageUrl(post.image)}

@@ -21,18 +21,18 @@ export function ProfileTabs({
 }: ProfileTabsProps) {
   return (
     <Tabs defaultValue="posts" className="w-full">
-      <TabsList className="w-full justify-start border-t">
+      <TabsList variant="line" className="w-full border-t pt-0 mb-2">
         <TabsTrigger value="posts" className="gap-2">
-          <Grid className="h-4 w-4" />
+          <Grid className="h-3.5 w-3.5" />
           POSTS
         </TabsTrigger>
         <TabsTrigger value="saved" className="gap-2">
-          <Bookmark className="h-4 w-4" />
+          <Bookmark className="h-3.5 w-3.5" />
           SAVED
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="posts" className="mt-6">
+      <TabsContent value="posts" className="mt-2">
         {userPosts.length === 0 ? (
           <EmptyState
             icon={Grid}
@@ -43,7 +43,7 @@ export function ProfileTabs({
           <PostsGrid posts={userPosts} onPostClick={onPostClick} />
         )}
       </TabsContent>
-      <TabsContent value="saved" className="mt-6">
+      <TabsContent value="saved" className="mt-2">
         {savedPosts.length === 0 ? (
           <EmptyState
             icon={Bookmark}

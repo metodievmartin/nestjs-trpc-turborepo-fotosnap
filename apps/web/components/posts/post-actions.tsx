@@ -22,7 +22,7 @@ export default function PostActions({
   const iconButton = 'p-0 h-auto w-auto hover:opacity-60 hover:bg-transparent';
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between pb-2">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"

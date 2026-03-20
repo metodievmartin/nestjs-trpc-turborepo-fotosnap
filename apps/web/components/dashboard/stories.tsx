@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
-import { Card } from '../ui/card';
 import UserAvatar from '../ui/user-avatar';
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
@@ -28,8 +27,8 @@ export default function Stories() {
   );
 
   return (
-    <Card className="p-4">
-      <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-2">
+    <div className="border-b py-4">
+      <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
         <div className="flex flex-col items-center space-y-1 shrink-0">
           <div className="relative">
             <div
@@ -108,6 +107,6 @@ export default function Stories() {
         open={showStoryViewer}
         onOpenChange={setShowStoryViewer}
       />
-    </Card>
+    </div>
   );
 }

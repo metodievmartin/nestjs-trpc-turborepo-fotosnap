@@ -28,7 +28,7 @@ export default function Comments({
         />
       </div>
 
-      <CommentForm onAddComment={onAddComment} />
+      <CommentForm onAddComment={onAddComment} borderless />
     </div>
   );
 }

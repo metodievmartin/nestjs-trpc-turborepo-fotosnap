@@ -7,7 +7,6 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { Post } from '@repo/contracts/posts';
 
-import { Card } from '../ui/card';
 import { getImageUrl } from '@/lib/media';
 import PostActions from '../posts/post-actions';
 import UserProfileLink from '../ui/user-profile-link';
@@ -23,7 +22,7 @@ export default function PostCard({ post }: PostCardProps) {
   const { likePost, isLiking } = useLikePost(post.id);
 
   return (
-    <Card className="overflow-hidden">
+    <article className="border">
       <div className="flex items-center justify-between p-4">
         <UserProfileLink
           userId={post.user.id}
@@ -33,16 +32,16 @@ export default function PostCard({ post }: PostCardProps) {
         />
       </div>
 
-      <div className="aspect-square relative">
+      <div className="relative aspect-square bg-background">
         <Image
           src={getImageUrl(post.image)}
           alt="Post"
-          className="object-cover"
+          className="object-contain"
           fill
         />
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-1.5">
         <PostActions
           isLiked={post.isLiked}
           isLiking={isLiking}
@@ -84,6 +83,6 @@ export default function PostCard({ post }: PostCardProps) {
           </div>
         )}
       </div>
-    </Card>
+    </article>
   );
 }

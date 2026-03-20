@@ -23,6 +23,27 @@ interface ProfileHeaderProps {
   isOwnProfile: boolean;
 }
 
+function Bio({ bio, website }: { bio?: string | null; website?: string | null }) {
+  if (!bio && !website) return null;
+
+  return (
+    <div className="space-y-2">
+      {bio && <div className="text-sm whitespace-pre-wrap">{bio}</div>}
+      {website && (
+        <a
+          href={website}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-primary hover:underline flex items-center gap-1"
+        >
+          <Globe className="h-3 w-3" />
+          {website}
+        </a>
+      )}
+    </div>
+  );
+}
+
 export default function ProfileHeader({
   profile,
   onFollowToggle,
@@ -33,31 +54,33 @@ export default function ProfileHeader({
   isOwnProfile,
 }: ProfileHeaderProps) {
   const { logout } = useLogout();
+
   return (
-    <div className="mb-8">
-      <div className="flex flex-col md:flex-row gap-8 items-start md:items-center relative">
+    <div className="relative mb-8">
+      <div className="md:hidden absolute top-0 right-0">
+        <ThemeToggle variant="ghost" />
+      </div>
+
+      <div className="flex flex-row gap-6 md:gap-8 items-center">
         <UserAvatar
           src={profile.image}
           alt={profile.name}
-          size="2xl"
-          className="shrink-0 border-2"
+          size="xl"
+          className="shrink-0 border-2 md:!w-32 md:!h-32"
         />
 
-        {isOwnProfile && (
-          <div className="absolute top-0 right-0">
-            <ThemeToggle variant="ghost" />
-          </div>
-        )}
-
-        <div className="flex-1 space-y-4">
-          <div className="flex sm:flex-row sm:items-center gap-2">
-            <h1 className="text-2xl font-normal">{profile.name}</h1>
-            <div className="flex gap-2">
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl md:text-2xl font-normal truncate">
+              {profile.name}
+            </h1>
+            <div className="flex gap-2 shrink-0">
               {!isOwnProfile && (
                 <Button
                   onClick={onFollowToggle}
                   disabled={isFollowLoading}
                   variant={profile.isFollowing ? 'outline' : 'default'}
+                  size="sm"
                 >
                   {profile.isFollowing ? 'Following' : 'Follow'}
                 </Button>
@@ -89,7 +112,7 @@ export default function ProfileHeader({
             </div>
           </div>
 
-          <div className="flex gap-8 text-sm">
+          <div className="flex gap-6 md:gap-8 text-sm">
             <div>
               <span className="font-semibold">{profile.postCount}</span>{' '}
               <span className="text-muted-foreground">posts</span>
@@ -112,23 +135,15 @@ export default function ProfileHeader({
             </Button>
           </div>
 
-          <div className="space-y-1">
-            {profile.bio && (
-              <div className="text-sm whitespace-pre-wrap">{profile.bio}</div>
-            )}
-            {profile.website && (
-              <a
-                href={profile.website}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-primary hover:underline flex items-center gap-1"
-              >
-                <Globe className="h-3 w-3" />
-                {profile.website}
-              </a>
-            )}
+          <div className="hidden md:block">
+            <Bio bio={profile.bio} website={profile.website} />
           </div>
         </div>
+      </div>
+
+      {/* Bio below on mobile — avoids cramping the horizontal layout */}
+      <div className="mt-4 md:hidden">
+        <Bio bio={profile.bio} website={profile.website} />
       </div>
     </div>
   );
