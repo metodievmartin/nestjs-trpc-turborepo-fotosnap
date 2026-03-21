@@ -63,7 +63,8 @@ export default function ProfileHeader({
           src={profile.image}
           alt={profile.name}
           size="xl"
-          className="shrink-0 border-2 md:!w-32 md:!h-32"
+          className="shrink-0 border-2 md:w-32 md:h-32"
+          iconClassName="md:w-12 md:h-12"
         />
 
         <div className="flex-1 min-w-0 space-y-3">

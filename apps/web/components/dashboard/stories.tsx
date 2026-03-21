@@ -81,7 +81,7 @@ export default function Stories() {
               <UserAvatar
                 src={storyGroup.avatar}
                 alt={`${storyGroup.username}'s avatar`}
-                size="xl"
+                size="lg"
                 className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200"
               />
             </div>
