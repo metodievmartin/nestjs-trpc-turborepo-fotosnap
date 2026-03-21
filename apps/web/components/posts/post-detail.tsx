@@ -20,6 +20,7 @@ import { useComments } from '@/hooks/use-comments';
 import { useLikePost } from '@/hooks/use-like-post';
 import CommentList from '../dashboard/comment-list';
 import CommentForm, { CommentFormHandle } from '../dashboard/comment-form';
+import { PostDetailSkeleton } from './post-detail-skeleton';
 
 interface PostDetailProps {
   postId: number;
@@ -37,11 +38,7 @@ export function PostDetail({ postId }: PostDetailProps) {
   const commentFormRef = useRef<CommentFormHandle>(null);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full py-20">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <PostDetailSkeleton />;
   }
 
   if (!post) {

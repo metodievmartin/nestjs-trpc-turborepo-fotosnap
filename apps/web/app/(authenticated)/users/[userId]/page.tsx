@@ -12,6 +12,7 @@ import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
 import { PostModal } from '@/components/users/post-modal';
 import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
+import { ProfilePageSkeleton } from '@/components/users/profile-page-skeleton';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -39,11 +40,7 @@ export default function ProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (!profile) {
