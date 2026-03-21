@@ -12,6 +12,7 @@ import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
 import { PostModal } from '@/components/users/post-modal';
 import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
+import { PageContainer } from '@/components/layout/page-container';
 import { ProfilePageSkeleton } from '@/components/users/profile-page-skeleton';
 
 export default function ProfilePage() {
@@ -48,16 +49,14 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">User not found</h1>
-          <p className="text-muted-foreground">
-            This user doesn&apos;t exist
-          </p>
+          <p className="text-muted-foreground">This user doesn&apos;t exist</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <PageContainer>
       <ProfileHeader
         profile={profile}
         onFollowToggle={handleFollowToggle}
@@ -91,6 +90,6 @@ export default function ProfilePage() {
         isPending={isUpdateProfilePending}
         error={updateProfileError}
       />
-    </div>
+    </PageContainer>
   );
 }

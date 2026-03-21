@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { trpc } from '@/lib/trpc/client';
 import { Button } from '@/components/ui/button';
 import { FollowList } from '@/components/users/follow-list';
+import { PageContainer } from '@/components/layout/page-container';
 
 interface FollowListPageProps {
   type: 'followers' | 'following';
@@ -25,7 +26,7 @@ export default function FollowListPage({ type }: FollowListPageProps) {
   const label = labels[type];
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6">
+    <PageContainer maxWidth="lg">
       <div className="flex items-center gap-2 p-4">
         <Button
           variant="ghost"
@@ -42,6 +43,6 @@ export default function FollowListPage({ type }: FollowListPageProps) {
       <div className="px-4">
         <FollowList userId={userId} type={type} />
       </div>
-    </div>
+    </PageContainer>
   );
 }

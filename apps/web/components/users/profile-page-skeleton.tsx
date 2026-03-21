@@ -1,8 +1,9 @@
 import { Skeleton } from '../ui/skeleton';
+import { PageContainer } from '../layout/page-container';
 
 export function ProfilePageSkeleton() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <PageContainer>
       {/* Profile header */}
       <div className="mb-8">
         <div className="flex flex-row gap-6 md:gap-8 items-center">
@@ -28,6 +29,6 @@ export function ProfilePageSkeleton() {
           <Skeleton key={i} className="aspect-square rounded-none" />
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -2,16 +2,15 @@
 
 import Feed from '@/components/dashboard/feed';
 import Stories from '@/components/dashboard/stories';
+import { PageContainer } from '@/components/layout/page-container';
 
 export default function Home() {
   return (
-    <div className="space-y-6 px-4 py-6">
-      <div className="mx-auto max-w-3xl">
-        <Stories />
-      </div>
+    <PageContainer maxWidth="3xl" className="space-y-6">
+      <Stories />
       <div className="mx-auto max-w-[630px]">
         <Feed />
       </div>
-    </div>
+    </PageContainer>
   );
 }

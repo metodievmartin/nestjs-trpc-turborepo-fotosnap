@@ -6,19 +6,16 @@ import { Search, TrendingUp, Compass } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import UserAvatar from '@/components/ui/user-avatar';
+import { PageContainer } from '@/components/layout/page-container';
 import { mockSuggestions } from '@/lib/mock-suggestions';
 
 export default function ExplorePage() {
   return (
-    <div className="max-w-2xl mx-auto space-y-10 px-4 py-6">
+    <PageContainer maxWidth="2xl" className="space-y-10">
       {/* Search bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search"
-          className="pl-10 h-10"
-          disabled
-        />
+        <Input placeholder="Search" className="pl-10 h-10" disabled />
       </div>
 
       {/* Suggested for you */}
@@ -31,11 +28,7 @@ export default function ExplorePage() {
                 href={`/users/${user.id}`}
                 className="hover:opacity-80 transition-opacity shrink-0"
               >
-                <UserAvatar
-                  src={user.avatar}
-                  alt={user.username}
-                  size="md"
-                />
+                <UserAvatar src={user.avatar} alt={user.username} size="md" />
               </Link>
               <div className="flex-1 min-w-0">
                 <Link
@@ -83,6 +76,6 @@ export default function ExplorePage() {
           Discover new content coming soon
         </div>
       </section>
-    </div>
+    </PageContainer>
   );
 }
