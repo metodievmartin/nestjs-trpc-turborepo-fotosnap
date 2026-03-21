@@ -1,7 +1,7 @@
 'use client';
 
 import { trpc } from '@/lib/trpc/client';
-import PostCard from './post-card';
+import PostCard from '@/components/posts/post-card';
 
 export default function Feed() {
   const posts = trpc.posts.findAll.useQuery({});

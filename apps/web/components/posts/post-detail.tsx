@@ -1,10 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { formatDistanceToNow } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
 
 import { trpc } from '@/lib/trpc/client';
@@ -12,7 +10,12 @@ import { getImageUrl } from '@/lib/media';
 import { Button } from '../ui/button';
 import UserProfileLink from '../ui/user-profile-link';
 import { authClient } from '@/lib/auth/client';
-import PostActions from '../posts/post-actions';
+import PostActions from './post-actions';
+import { PostImage } from './post-image';
+import { PostCaption } from './post-caption';
+import { PostLikesCount } from './post-likes-count';
+import { PostTimestamp } from './post-timestamp';
+import { PostOptionsMenu } from './post-options-menu';
 import { useComments } from '@/hooks/use-comments';
 import { useLikePost } from '@/hooks/use-like-post';
 import CommentList from '../dashboard/comment-list';
@@ -54,15 +57,11 @@ export function PostDetail({ postId }: PostDetailProps) {
 
   const caption = (
     <div className="mb-3">
-      <p className="text-sm">
-        <Link
-          href={`/users/${post.user.id}`}
-          className="font-semibold mr-1 hover:opacity-80"
-        >
-          {post.user.username}
-        </Link>
-        {post.caption}
-      </p>
+      <PostCaption
+        userId={post.user.id}
+        username={post.user.username}
+        caption={post.caption}
+      />
     </div>
   );
 
@@ -79,36 +78,29 @@ export function PostDetail({ postId }: PostDetailProps) {
 
   const likesCount = (
     <div className="px-3 pb-1 md:px-4 md:pb-2">
-      <p className="font-semibold text-sm">
-        {post.likes.toLocaleString()} likes
-      </p>
+      <PostLikesCount likes={post.likes} />
     </div>
   );
 
   const timestamp = (
     <div className="px-3 pb-2 md:px-4 md:pb-3">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-        {formatDistanceToNow(new Date(post.timestamp), {
-          addSuffix: true,
-        })}
-      </p>
+      <PostTimestamp
+        timestamp={post.timestamp}
+        className="text-[10px] uppercase tracking-wide"
+      />
     </div>
   );
 
   const commentInput = (
     <div className="border-t px-4 py-2">
-      <CommentForm
-        ref={commentFormRef}
-        onAddComment={addComment}
-        borderless
-      />
+      <CommentForm ref={commentFormRef} onAddComment={addComment} borderless />
     </div>
   );
 
   /* ── Mobile: single-column natural scroll, sticky comment input ── */
   const mobileLayout = (
     <div className="md:hidden pb-28">
-      {/* Header — back arrow + avatar + username */}
+      {/* Header — back arrow + avatar + username + options */}
       <div className="flex items-center gap-2 px-2 py-1.5 border-b">
         <Button
           variant="ghost"
@@ -123,18 +115,20 @@ export function PostDetail({ postId }: PostDetailProps) {
           username={post.user.username}
           avatar={post.user.avatar}
         />
+        <PostOptionsMenu
+          postId={post.id}
+          userId={post.user.id}
+          className="ml-auto -mr-2"
+        />
       </div>
 
       {/* Image — aspect-ratio driven, no fixed height */}
-      <div className="relative aspect-square bg-black">
-        <Image
-          src={getImageUrl(post.image)}
-          alt={post.caption}
-          fill
-          className="object-contain"
-          sizes="100vw"
-        />
-      </div>
+      <PostImage
+        src={post.image}
+        alt={post.caption}
+        sizes="100vw"
+        className="bg-black"
+      />
 
       {/* Actions → likes → caption → timestamp */}
       {actionButtons}
@@ -183,6 +177,11 @@ export function PostDetail({ postId }: PostDetailProps) {
             userId={post.user.id}
             username={post.user.username}
             avatar={post.user.avatar}
+          />
+          <PostOptionsMenu
+            postId={post.id}
+            userId={post.user.id}
+            className="ml-auto -mr-2"
           />
         </div>
 
