@@ -10,6 +10,7 @@
     "db:up": "docker compose -f infra/dev/docker-compose.yml -p fotosnap up -d",
     "db:down": "docker compose -f infra/dev/docker-compose.yml -p fotosnap down",
     "db:logs": "docker compose -f infra/dev/docker-compose.yml -p fotosnap logs -f",
+    "db:seed": "npm run db:seed --workspace=backend",
     "db:reset": "docker compose -f infra/dev/docker-compose.yml -p fotosnap down -v",
     "trpc:generate": "nestjs-trpc generate --entrypoint apps/backend/src/app.module.ts --output packages/trpc/src/server",
     "trpc:watch": "nestjs-trpc generate --entrypoint apps/backend/src/app.module.ts --output packages/trpc/src/server --watch"
