@@ -150,7 +150,7 @@ export class UsersService {
           ),
         ),
       )
-      .limit(5);
+      .limit(6);
   }
 
   async getUserProfile(
