@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Edit, Globe, LogOut, Settings } from 'lucide-react';
+import { Camera, Edit, Globe, LogOut, Settings } from 'lucide-react';
 
 import { UserProfile } from '@repo/contracts/users';
 
@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
   profile: UserProfile;
   onFollowToggle: () => void;
   onEditProfile: () => void;
+  onChangePhoto: () => void;
   isFollowLoading: boolean;
   isOwnProfile: boolean;
 }
@@ -47,6 +48,7 @@ export default function ProfileHeader({
   profile,
   onFollowToggle,
   onEditProfile,
+  onChangePhoto,
   isFollowLoading,
   isOwnProfile,
 }: ProfileHeaderProps) {
@@ -59,13 +61,26 @@ export default function ProfileHeader({
       </div>
 
       <div className="flex flex-row gap-6 md:gap-8 items-center">
-        <UserAvatar
-          src={profile.image}
-          alt={profile.name}
-          size="xl"
-          className="shrink-0 border-2 md:w-32 md:h-32"
-          iconClassName="md:w-12 md:h-12"
-        />
+        <div className="relative shrink-0">
+          <UserAvatar
+            src={profile.image}
+            alt={profile.name}
+            size="xl"
+            className="border-2 md:w-32 md:h-32"
+            iconClassName="md:w-12 md:h-12"
+          />
+          {isOwnProfile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Change profile photo"
+              onClick={onChangePhoto}
+              className="absolute bottom-0 right-0 w-7 h-7 bg-primary text-primary-foreground rounded-full p-1 hover:bg-primary/90 cursor-pointer"
+            >
+              <Camera className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </div>
 
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-center gap-2">
@@ -96,6 +111,10 @@ export default function ProfileHeader({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={onChangePhoto}>
+                      <Camera className="h-4 w-4 mr-2" />
+                      Change Photo
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={onEditProfile}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Profile

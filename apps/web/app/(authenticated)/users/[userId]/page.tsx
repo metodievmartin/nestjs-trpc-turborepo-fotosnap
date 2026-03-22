@@ -8,10 +8,12 @@ import { authClient } from '@/lib/auth/client';
 
 import { useFollowUser } from '@/hooks/use-follow-user';
 import { useUpdateProfile } from '@/hooks/use-update-profile';
+import { useUpdateAvatar } from '@/hooks/use-update-avatar';
 import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
 import { PostModal } from '@/components/users/post-modal';
 import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
+import AvatarUploadDialog from '@/components/dashboard/avatar-upload-dialog';
 import { PageContainer } from '@/components/layout/page-container';
 import { ProfilePageSkeleton } from '@/components/users/profile-page-skeleton';
 
@@ -19,6 +21,7 @@ export default function ProfilePage() {
   const params = useParams();
   const userId = params.userId as string;
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isAvatarUploadOpen, setIsAvatarUploadOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const { data: session } = authClient.useSession();
   const { data: posts = [] } = trpc.posts.findAll.useQuery({ userId });
@@ -34,6 +37,7 @@ export default function ProfilePage() {
     isPending: isUpdateProfilePending,
     error: updateProfileError,
   } = useUpdateProfile(userId, () => setIsEditProfileOpen(false));
+  const { updateAvatar } = useUpdateAvatar(userId);
 
   const handleFollowToggle = () => {
     if (!profile) return;
@@ -61,6 +65,7 @@ export default function ProfilePage() {
         profile={profile}
         onFollowToggle={handleFollowToggle}
         onEditProfile={() => setIsEditProfileOpen(true)}
+        onChangePhoto={() => setIsAvatarUploadOpen(true)}
         isFollowLoading={isFollowPending}
         isOwnProfile={session?.user.id === profile.id}
       />
@@ -89,6 +94,13 @@ export default function ProfilePage() {
         onSave={updateProfile}
         isPending={isUpdateProfilePending}
         error={updateProfileError}
+      />
+
+      <AvatarUploadDialog
+        open={isAvatarUploadOpen}
+        onOpenChange={setIsAvatarUploadOpen}
+        onSubmit={updateAvatar}
+        currentAvatar={session?.user.image}
       />
     </PageContainer>
   );
