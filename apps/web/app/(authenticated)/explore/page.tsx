@@ -1,13 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { Search, TrendingUp, Compass } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import UserAvatar from '@/components/ui/user-avatar';
 import { PageContainer } from '@/components/layout/page-container';
-import { mockSuggestions } from '@/lib/mock-suggestions';
+import { SuggestedUsers } from '@/components/users/suggested-users';
 
 export default function ExplorePage() {
   return (
@@ -19,41 +16,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Suggested for you */}
-      <section>
-        <h2 className="font-semibold text-base mb-5">Suggested for you</h2>
-        <div className="max-w-sm mx-auto space-y-4">
-          {mockSuggestions.map((user) => (
-            <div key={user.id} className="flex items-center gap-3">
-              <Link
-                href={`/users/${user.id}`}
-                className="hover:opacity-80 transition-opacity shrink-0"
-              >
-                <UserAvatar src={user.avatar} alt={user.username} size="md" />
-              </Link>
-              <div className="flex-1 min-w-0">
-                <Link
-                  href={`/users/${user.id}`}
-                  className="font-semibold text-sm hover:opacity-80 transition-opacity"
-                >
-                  {user.username}
-                </Link>
-                {user.followedBy && (
-                  <div className="text-xs text-muted-foreground">
-                    Followed by {user.followedBy}
-                  </div>
-                )}
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs cursor-pointer"
-              >
-                Follow
-              </Button>
-            </div>
-          ))}
-        </div>
-      </section>
+      <SuggestedUsers />
 
       {/* Trending */}
       <section>
