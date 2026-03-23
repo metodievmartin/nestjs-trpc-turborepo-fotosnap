@@ -10,6 +10,11 @@ import { StoryViewer } from '@/components/dashboard/story-viewer';
 
 import { useCreateStory } from '@/hooks/use-create-story';
 
+type ViewerState =
+  | { kind: 'closed' }
+  | { kind: 'own' }
+  | { kind: 'feed'; index: number };
+
 export default function Stories() {
   const { data: ownStoryGroup } = trpc.stories.getOwnStories.useQuery();
   const { data: otherStoryGroups = [] } =
@@ -17,13 +22,7 @@ export default function Stories() {
   const { createStory } = useCreateStory();
   const { data: session } = authClient.useSession();
   const [showCreateStory, setShowCreateStory] = useState(false);
-  const [showStoryViewer, setShowStoryViewer] = useState(false);
-  const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
-
-  const allStoryGroups = [
-    ...(ownStoryGroup ? [ownStoryGroup] : []),
-    ...otherStoryGroups,
-  ];
+  const [viewer, setViewer] = useState<ViewerState>({ kind: 'closed' });
 
   return (
     <div className="border-b py-4">
@@ -36,8 +35,7 @@ export default function Stories() {
               <button
                 onClick={() => {
                   if (ownStoryGroup) {
-                    setSelectedGroupIndex(0);
-                    setShowStoryViewer(true);
+                    setViewer({ kind: 'own' });
                   }
                 }}
                 className="block cursor-pointer"
@@ -71,10 +69,7 @@ export default function Stories() {
           <div
             key={storyGroup.userId}
             className="flex flex-col items-center space-y-1 shrink-0 cursor-pointer"
-            onClick={() => {
-              setSelectedGroupIndex(ownStoryGroup ? index + 1 : index);
-              setShowStoryViewer(true);
-            }}
+            onClick={() => setViewer({ kind: 'feed', index })}
           >
             <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600">
               <UserAvatar
@@ -100,12 +95,16 @@ export default function Stories() {
         onSubmit={createStory}
       />
 
-      <StoryViewer
-        storyGroups={allStoryGroups}
-        initialGroupIndex={selectedGroupIndex}
-        open={showStoryViewer}
-        onOpenChange={setShowStoryViewer}
-      />
+      {viewer.kind !== 'closed' && (
+        <StoryViewer
+          storyGroups={
+            viewer.kind === 'own' ? [ownStoryGroup!] : otherStoryGroups
+          }
+          initialGroupIndex={viewer.kind === 'feed' ? viewer.index : 0}
+          open
+          onOpenChange={() => setViewer({ kind: 'closed' })}
+        />
+      )}
     </div>
   );
 }
