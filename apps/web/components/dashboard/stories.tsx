@@ -11,24 +11,23 @@ import { StoryViewer } from '@/components/dashboard/story-viewer';
 import { useCreateStory } from '@/hooks/use-create-story';
 
 export default function Stories() {
-  const { data: storyGroups = [] } = trpc.stories.getStories.useQuery();
+  const { data: ownStoryGroup } = trpc.stories.getOwnStories.useQuery();
+  const { data: otherStoryGroups = [] } =
+    trpc.stories.getFeedStories.useQuery();
   const { createStory } = useCreateStory();
   const { data: session } = authClient.useSession();
   const [showCreateStory, setShowCreateStory] = useState(false);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
 
-  const ownStoryGroup = storyGroups.find(
-    (group) => group.userId === session?.user.id
-  );
-
-  const otherStoryGroups = storyGroups.filter(
-    (group) => group.userId !== session?.user.id
-  );
+  const allStoryGroups = [
+    ...(ownStoryGroup ? [ownStoryGroup] : []),
+    ...otherStoryGroups,
+  ];
 
   return (
     <div className="border-b py-4">
-      <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
+      <div className="flex space-x-6 overflow-x-auto scrollbar-hide">
         <div className="flex flex-col items-center space-y-1 shrink-0">
           <div className="relative">
             <div
@@ -68,7 +67,7 @@ export default function Stories() {
           </span>
         </div>
 
-        {otherStoryGroups?.map((storyGroup, index) => (
+        {otherStoryGroups.map((storyGroup, index) => (
           <div
             key={storyGroup.userId}
             className="flex flex-col items-center space-y-1 shrink-0 cursor-pointer"
@@ -77,12 +76,12 @@ export default function Stories() {
               setShowStoryViewer(true);
             }}
           >
-            <div className="relative">
+            <div className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600">
               <UserAvatar
                 src={storyGroup.avatar}
                 alt={`${storyGroup.username}'s avatar`}
-                size="lg"
-                className="p-0.5 rounded-full bg-linear-to-tr from-yellow-400 to-fuchsia-600 bg-gray-200"
+                size="xl"
+                className="border-2 border-white"
               />
             </div>
             <span
@@ -102,7 +101,7 @@ export default function Stories() {
       />
 
       <StoryViewer
-        storyGroups={storyGroups}
+        storyGroups={allStoryGroups}
         initialGroupIndex={selectedGroupIndex}
         open={showStoryViewer}
         onOpenChange={setShowStoryViewer}

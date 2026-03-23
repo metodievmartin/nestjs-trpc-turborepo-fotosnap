@@ -5,7 +5,7 @@ export function useCreateStory() {
   const utils = trpc.useUtils();
   const createStory = trpc.stories.create.useMutation({
     onSuccess: () => {
-      utils.stories.getStories.invalidate();
+      utils.stories.getOwnStories.invalidate();
     },
   });
 
