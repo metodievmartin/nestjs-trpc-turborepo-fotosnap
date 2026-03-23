@@ -1,8 +1,13 @@
-import { asc, eq, gt } from 'drizzle-orm';
+import { and, asc, eq, gt, not } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { CreateStoryInput, Story, StoryGroup } from '@repo/contracts/stories';
+import {
+  CreateStoryInput,
+  NullableStoryGroup,
+  Story,
+  StoryGroup,
+} from '@repo/contracts/stories';
 
 import { user } from '../auth/schema';
 import { story } from './schemas/schema';
@@ -45,33 +50,46 @@ export class StoriesService {
     return this.toStory(createdStory!);
   }
 
-  async getStories(userId: string): Promise<StoryGroup[]> {
+  async getUserStories(userId: string): Promise<NullableStoryGroup> {
     const fetchedStories = await this.database.query.story.findMany({
-      where: gt(story.expiresAt, new Date()),
+      where: and(eq(story.userId, userId), gt(story.expiresAt, new Date())),
+      orderBy: [asc(story.createdAt)],
+      with: { user: true },
+    });
+
+    if (fetchedStories.length === 0) return null;
+
+    return this.toStoryGroup(fetchedStories);
+  }
+
+  async getFeedStories(viewerId: string): Promise<StoryGroup[]> {
+    const fetchedStories = await this.database.query.story.findMany({
+      where: and(
+        not(eq(story.userId, viewerId)),
+        gt(story.expiresAt, new Date()),
+      ),
       orderBy: [asc(story.createdAt)],
       with: {
         user: true,
       },
     });
 
-    const storyGroups = new Map<string, StoryGroup>();
+    const grouped = Map.groupBy(fetchedStories, (s) => s.userId);
 
-    for (const fetchedStory of fetchedStories) {
-      if (!storyGroups.has(fetchedStory.userId)) {
-        storyGroups.set(fetchedStory.userId, {
-          userId: fetchedStory.userId,
-          username: fetchedStory.user.name,
-          avatar: fetchedStory.user.image || '',
-          stories: [],
-        });
-      }
+    return Array.from(grouped.values()).map((stories) =>
+      this.toStoryGroup(stories),
+    );
+  }
 
-      storyGroups
-        .get(fetchedStory.userId)!
-        .stories.push(this.toStory(fetchedStory));
-    }
+  private toStoryGroup(fetchedStories: StoryWithUser[]): StoryGroup {
+    const first = fetchedStories[0];
 
-    return Array.from(storyGroups.values());
+    return {
+      userId: first.userId,
+      username: first.user.name,
+      avatar: first.user.image || '',
+      stories: fetchedStories.map((s) => this.toStory(s)),
+    };
   }
 
   private toStory(fetchedStory: StoryWithUser): Story {

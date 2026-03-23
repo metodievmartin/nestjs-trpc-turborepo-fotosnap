@@ -9,10 +9,13 @@ import {
 import { z } from 'zod';
 
 import {
+  nullableStoryGroupSchema,
   storyGroupSchema,
   storySchema,
   createStorySchema,
+  getUserStoriesSchema,
   type CreateStoryInput,
+  type GetUserStoriesInput,
 } from '@repo/contracts/stories';
 
 import { StoriesService } from './stories.service';
@@ -24,9 +27,25 @@ import type { TrpcSessionContext } from '../app-context.interface';
 export class StoriesRouter {
   constructor(private readonly storiesService: StoriesService) {}
 
+  @Query({ output: nullableStoryGroupSchema })
+  async getOwnStories(@Ctx() context: TrpcSessionContext) {
+    return this.storiesService.getUserStories(context.user.id);
+  }
+
+  @Query({
+    input: getUserStoriesSchema,
+    output: nullableStoryGroupSchema,
+  })
+  async getUserStories(
+    @Input() input: GetUserStoriesInput,
+    @Ctx() context: TrpcSessionContext,
+  ) {
+    return this.storiesService.getUserStories(input.userId);
+  }
+
   @Query({ output: z.array(storyGroupSchema) })
-  async getStories(@Ctx() context: TrpcSessionContext) {
-    return this.storiesService.getStories(context.user.id);
+  async getFeedStories(@Ctx() context: TrpcSessionContext) {
+    return this.storiesService.getFeedStories(context.user.id);
   }
 
   @Mutation({ input: createStorySchema, output: storySchema })

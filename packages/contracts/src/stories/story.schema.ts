@@ -26,6 +26,14 @@ export const storyGroupSchema = z.object({
   stories: z.array(storySchema),
 });
 
+export const nullableStoryGroupSchema = storyGroupSchema.nullable();
+
+export const getUserStoriesSchema = z.object({
+  userId: z.string().min(1),
+});
+
 export type Story = z.infer<typeof storySchema>;
 export type StoryGroup = z.infer<typeof storyGroupSchema>;
+export type NullableStoryGroup = z.infer<typeof nullableStoryGroupSchema>;
 export type CreateStoryInput = z.infer<typeof createStorySchema>;
+export type GetUserStoriesInput = z.infer<typeof getUserStoriesSchema>;

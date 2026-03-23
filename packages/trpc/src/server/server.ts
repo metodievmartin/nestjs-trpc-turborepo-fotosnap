@@ -16,7 +16,7 @@ const publicProcedure = t.procedure;
 import { userIdSchema, userPreviewSchema, updateProfileSchema, userProfileSchema } from "@repo/contracts/users";
 import { createCommentSchema, getCommentsSchema, commentSchema, deleteCommentSchema } from "@repo/contracts/comments";
 import { findAllPostsSchema, postSchema, findByIdPostSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
-import { storyGroupSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
+import { nullableStoryGroupSchema, getUserStoriesSchema, storyGroupSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
 
 const appRouter = t.router({
   users: t.router({
@@ -75,7 +75,14 @@ const appRouter = t.router({
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
     }),
   stories: t.router({
-    getStories: publicProcedure
+    getOwnStories: publicProcedure
+      .output(nullableStoryGroupSchema)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getUserStories: publicProcedure
+      .input(getUserStoriesSchema)
+      .output(nullableStoryGroupSchema)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getFeedStories: publicProcedure
       .output(z.array(storyGroupSchema))
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     create: publicProcedure
