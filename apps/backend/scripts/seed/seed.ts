@@ -1,6 +1,6 @@
 /**
  * Database seed script — creates 15 demo users with profiles, avatars,
- * and partial follow relationships.
+ * partial follow relationships, and stories.
  *
  * Usage:
  *   npm run db:seed          (from apps/backend or repo root)
@@ -10,6 +10,7 @@
  *   - Migrations applied (npm run db:migrate)
  *
  * The script is idempotent — existing users (matched by email) are skipped.
+ * Stories for seed users are deleted and re-inserted with fresh timestamps.
  * All seed users share the password: password123
  */
 
@@ -25,164 +26,16 @@ import * as authSchema from '../../src/auth/schema';
 import * as postsSchema from '../../src/posts/schemas/schema';
 import * as commentSchema from '../../src/comments/schemas/schema';
 import * as storiesSchema from '../../src/stories/schemas/schema';
+import { SEED_USERS, DATABASE_URL, UPLOADS_DIR } from './seed-data';
+import { SEED_STORIES, copyStoryImages, seedStories } from './story-data';
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ??
-  'postgresql://postgres:postgres@localhost:5432/fotosnap?schema=public';
-
 const SEED_PASSWORD = 'password123';
 
-const UPLOADS_DIR = path.resolve(__dirname, '..', '..', 'uploads', 'images');
 const AVATARS_DIR = path.resolve(__dirname, 'avatars');
-
-// ---------------------------------------------------------------------------
-// Seed users — 11 with avatars, 4 without (to test missing-avatar states)
-//
-// Bios hint at the kind of posts each user would share, so future seed
-// content (posts, stories) can stay consistent with their persona.
-// ---------------------------------------------------------------------------
-
-interface SeedUser {
-  name: string;
-  email: string;
-  displayName: string;
-  bio: string;
-  website?: string;
-  avatar: string; // filename in avatars/ directory, empty string for no photo
-}
-
-const SEED_USERS: SeedUser[] = [
-  // ---- f-1: Glam blonde, plaid blazer — fashion & beauty ----
-  {
-    name: 'valentina.style',
-    email: 'valentina.style@fotosnap.dev',
-    displayName: 'Valentina Reyes',
-    bio: 'Fashion & beauty. Outfit inspo, runway recaps, and glam tutorials.',
-    website: 'https://valentinastyle.co',
-    avatar: 'user-profile-f-1.webp',
-  },
-  // ---- m-2: Curly hair, beard, B&W artistic shot — musician ----
-  {
-    name: 'daniel.crvz',
-    email: 'daniel.crvz@fotosnap.dev',
-    displayName: 'Daniel Cruz',
-    bio: 'Songwriter & producer. Studio sessions, late-night jams, vinyl finds.',
-    website: 'https://danielcrvz.music',
-    avatar: 'user-profile-m-2.webp',
-  },
-  // ---- f-3: Red curls, meadow, eyes closed — wellness & nature ----
-  {
-    name: 'rowan.wild',
-    email: 'rowan.wild@fotosnap.dev',
-    displayName: 'Rowan Gallagher',
-    bio: 'Herbal tea, forest bathing, slow mornings. Wellness through nature.',
-    avatar: 'user-profile-f-3.webp',
-  },
-  // ---- m-4: Clean-cut, warm smile, travel mug — travel & lifestyle ----
-  {
-    name: 'marco.ventures',
-    email: 'marco.ventures@fotosnap.dev',
-    displayName: 'Marco Silva',
-    bio: 'Coffee shops around the world. City guides, hidden gems, travel diaries.',
-    website: 'https://marcoventures.com',
-    avatar: 'user-profile-m-4.webp',
-  },
-  // ---- f-5: Blonde among tropical plants — botany & green living ----
-  {
-    name: 'hannah.bloom',
-    email: 'hannah.bloom@fotosnap.dev',
-    displayName: 'Hannah Lindqvist',
-    bio: 'Plant mom. Botanical gardens, indoor jungles, propagation tips.',
-    avatar: 'user-profile-f-5.webp',
-  },
-  // ---- m-6: Orange beanie, turtleneck, rooftop city view — urban creative ----
-  {
-    name: 'jay.onthe.roof',
-    email: 'jay.onthe.roof@fotosnap.dev',
-    displayName: 'Jay Okonkwo',
-    bio: 'Rooftop views, street style, city textures. London creative.',
-    website: 'https://jayontheroof.com',
-    avatar: 'user-profile-m-6.webp',
-  },
-  // ---- f-7: Brunette, grey blazer, office building — career & tech ----
-  {
-    name: 'claire.builds',
-    email: 'claire.builds@fotosnap.dev',
-    displayName: 'Claire Nakamura',
-    bio: 'Building things on the internet. Startup life, design thinking, side projects.',
-    avatar: 'user-profile-f-7.webp',
-  },
-  // ---- f-8: Brunette, brick wall, natural look — film & indie ----
-  {
-    name: 'nina.analog',
-    email: 'nina.analog@fotosnap.dev',
-    displayName: 'Nina Kowalski',
-    bio: 'Film photography, zines, thrift finds, indie playlists.',
-    avatar: 'user-profile-f-8.webp',
-  },
-  // ---- f-9: Striped shirt, golden hour, direct gaze — portrait & light ----
-  {
-    name: 'elena.dusk',
-    email: 'elena.dusk@fotosnap.dev',
-    displayName: 'Elena Vasquez',
-    bio: 'Chasing golden hour. Portraits, warm tones, magic-hour landscapes.',
-    website: 'https://elenadusk.photo',
-    avatar: 'user-profile-f-9.webp',
-  },
-  // ---- m-10: Blonde, glasses, reddish beard — tech & gaming ----
-  {
-    name: 'toby.codes',
-    email: 'toby.codes@fotosnap.dev',
-    displayName: 'Toby Engström',
-    bio: 'Developer by day, gamer by night. Mechanical keyboards, home-lab setups.',
-    website: 'https://tobycodes.dev',
-    avatar: 'user-profile-m-10.webp',
-  },
-  // ---- m-11: Dark hair, beard, night road, warm smile — outdoors & adventure ----
-  {
-    name: 'ryan.trails',
-    email: 'ryan.trails@fotosnap.dev',
-    displayName: 'Ryan Beckett',
-    bio: 'Hiking, camping, campfire cooking. National parks and backroads.',
-    avatar: 'user-profile-m-11.webp',
-  },
-  // ---- No avatar: lurker / new account ----
-  {
-    name: 'sam.quiet',
-    email: 'sam.quiet@fotosnap.dev',
-    displayName: 'Sam Almeida',
-    bio: 'Just here to scroll.',
-    avatar: '',
-  },
-  // ---- No avatar: foodie who hasn't set up profile yet ----
-  {
-    name: 'priya.eats',
-    email: 'priya.eats@fotosnap.dev',
-    displayName: 'Priya Sharma',
-    bio: 'Home cook. Recipe experiments, farmers market hauls, weekend bakes.',
-    avatar: '',
-  },
-  // ---- No avatar: fitness, hasn't uploaded a pic ----
-  {
-    name: 'alex.lifts',
-    email: 'alex.lifts@fotosnap.dev',
-    displayName: 'Alex Petrov',
-    bio: 'Calisthenics, meal prep, recovery routines.',
-    avatar: '',
-  },
-  // ---- No avatar: bookworm ----
-  {
-    name: 'mina.reads',
-    email: 'mina.reads@fotosnap.dev',
-    displayName: 'Mina Torres',
-    bio: 'Book reviews, reading nooks, annotated pages.',
-    avatar: '',
-  },
-];
 
 // ---------------------------------------------------------------------------
 // Follow graph — sparse on purpose so suggested users works.
@@ -269,10 +122,14 @@ async function seed() {
     emailAndPassword: { enabled: true },
   });
 
-  // --- Copy avatars ---
+  // --- Copy images ---
   console.log('Copying avatars...');
   const avatarMap = copyAvatars();
-  console.log(`  ${avatarMap.size} avatars copied.\n`);
+  console.log(`  ${avatarMap.size} avatars copied.`);
+
+  console.log('Copying story images...');
+  copyStoryImages();
+  console.log(`  ${SEED_STORIES.length} story images copied.\n`);
 
   // --- Create users ---
   console.log('Creating users...');
@@ -339,10 +196,15 @@ async function seed() {
 
   console.log(`  ${followCount} follow relationships created.`);
 
+  // --- Create stories (deletes existing seed-user stories first) ---
+  console.log('');
+  await seedStories(db, userIds);
+
   // --- Done ---
   console.log('\nSeed complete!');
   console.log(`  Users: ${SEED_USERS.length}`);
   console.log(`  Follow pairs: ${FOLLOW_PAIRS.length}`);
+  console.log(`  Stories: ${SEED_STORIES.length}`);
   console.log(`  Password for all: ${SEED_PASSWORD}\n`);
 
   await pool.end();
