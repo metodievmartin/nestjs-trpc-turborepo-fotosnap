@@ -123,9 +123,18 @@ export const follow = pgTable(
     followingId: text('following_id')
       .notNull()
       .references(() => user.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.followerId, table.followingId] }),
+    index('follow_followingId_createdAt_idx').on(
+      table.followingId,
+      table.createdAt,
+    ),
+    index('follow_followerId_createdAt_idx').on(
+      table.followerId,
+      table.createdAt,
+    ),
   ],
 );
 

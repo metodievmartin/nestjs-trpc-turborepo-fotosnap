@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  numericCursorPaginationSchema,
+  paginatedSchema,
+} from '@repo/contracts/pagination';
 
 export const createCommentSchema = z.object({
   postId: z.number(),
@@ -9,9 +13,11 @@ export const deleteCommentSchema = z.object({
   commentId: z.number(),
 });
 
-export const getCommentsSchema = z.object({
-  postId: z.number(),
-});
+export const getCommentsSchema = z
+  .object({
+    postId: z.number(),
+  })
+  .extend(numericCursorPaginationSchema.shape);
 
 export const commentSchema = z.object({
   id: z.number(),
@@ -25,7 +31,10 @@ export const commentSchema = z.object({
   createdAt: z.string(),
 });
 
+export const paginatedCommentsSchema = paginatedSchema(commentSchema);
+
 export type Comment = z.infer<typeof commentSchema>;
+export type PaginatedComments = z.infer<typeof paginatedCommentsSchema>;
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type DeleteCommentInput = z.infer<typeof deleteCommentSchema>;
 export type GetCommentsInput = z.infer<typeof getCommentsSchema>;

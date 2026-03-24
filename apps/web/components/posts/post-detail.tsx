@@ -29,9 +29,10 @@ interface PostDetailProps {
 export function PostDetail({ postId }: PostDetailProps) {
   const router = useRouter();
   const { data: post, isLoading } = trpc.posts.findById.useQuery({ postId });
-  const { data: comments = [] } = trpc.comments.findByPostId.useQuery({
+  const { data: commentsData } = trpc.comments.findByPostId.useQuery({
     postId,
   });
+  const comments = commentsData?.items ?? [];
   const { data: session } = authClient.useSession();
   const { likePost, isLiking } = useLikePost(postId);
   const { addComment, removeComment } = useComments(postId);

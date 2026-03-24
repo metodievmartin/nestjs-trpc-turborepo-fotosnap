@@ -1,10 +1,11 @@
-import { and, asc, eq, gt, not } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import {
   CreateStoryInput,
   NullableStoryGroup,
+  PaginatedStoryGroups,
   Story,
   StoryGroup,
 } from '@repo/contracts/stories';
@@ -62,23 +63,63 @@ export class StoriesService {
     return this.toStoryGroup(fetchedStories);
   }
 
-  async getFeedStories(viewerId: string): Promise<StoryGroup[]> {
+  async getFeedStories(
+    viewerId: string,
+    cursor?: string | null,
+    limit = 20,
+  ): Promise<PaginatedStoryGroups> {
+    const now = new Date();
+
+    // Query 1: Get distinct users with active stories, paginated by max story id.
+    // Uses raw SQL because Drizzle's query builder doesn't support GROUP BY + HAVING natively.
+    // HAVING TRUE acts as a no-op when there's no cursor (avoids conditional SQL fragments).
+    const cursorCondition = cursor
+      ? sql`MAX(${story.id}) < ${Number(cursor)}`
+      : sql`TRUE`;
+
+    const result = await this.database.execute<{
+      userId: string;
+      max_story_id: number;
+    }>(sql`
+      SELECT ${story.userId} as "userId", MAX(${story.id}) as max_story_id
+      FROM ${story}
+      WHERE ${story.userId} != ${viewerId}
+        AND ${story.expiresAt} > ${now}
+      GROUP BY ${story.userId}
+      HAVING ${cursorCondition}
+      ORDER BY max_story_id DESC
+      LIMIT ${limit + 1}
+    `);
+    const userGroups = result.rows;
+
+    const hasMore = userGroups.length > limit;
+    const pagedGroups = hasMore ? userGroups.slice(0, limit) : userGroups;
+
+    if (pagedGroups.length === 0) {
+      return { items: [], nextCursor: null, hasMore: false };
+    }
+
+    const userIds = pagedGroups.map((g) => g.userId);
+
+    // Query 2: Fetch all stories for those users
     const fetchedStories = await this.database.query.story.findMany({
-      where: and(
-        not(eq(story.userId, viewerId)),
-        gt(story.expiresAt, new Date()),
-      ),
+      where: and(inArray(story.userId, userIds), gt(story.expiresAt, now)),
       orderBy: [asc(story.createdAt)],
-      with: {
-        user: true,
-      },
+      with: { user: true },
     });
 
+    // Group stories by user and re-order to match query 1's pagination order
     const grouped = Map.groupBy(fetchedStories, (s) => s.userId);
+    const items = userIds
+      .map((uid) => grouped.get(uid))
+      .filter((stories) => stories && stories.length > 0)
+      .map((stories) => this.toStoryGroup(stories!));
 
-    return Array.from(grouped.values()).map((stories) =>
-      this.toStoryGroup(stories),
-    );
+    const nextCursor = hasMore
+      ? String(pagedGroups[pagedGroups.length - 1].max_story_id)
+      : null;
+
+    return { items, nextCursor, hasMore };
   }
 
   private toStoryGroup(fetchedStories: StoryWithUser[]): StoryGroup {

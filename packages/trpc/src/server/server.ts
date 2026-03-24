@@ -13,10 +13,10 @@ import { z } from "zod";
 
 const t = initTRPC.create();
 const publicProcedure = t.procedure;
-import { userIdSchema, userPreviewSchema, updateProfileSchema, userProfileSchema } from "@repo/contracts/users";
-import { createCommentSchema, getCommentsSchema, commentSchema, deleteCommentSchema } from "@repo/contracts/comments";
-import { findAllPostsSchema, postSchema, findByIdPostSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
-import { nullableStoryGroupSchema, getUserStoriesSchema, storyGroupSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
+import { userIdSchema, getFollowersSchema, paginatedUserPreviewsSchema, getFollowingSchema, userPreviewSchema, updateProfileSchema, userProfileSchema } from "@repo/contracts/users";
+import { createCommentSchema, getCommentsSchema, paginatedCommentsSchema, deleteCommentSchema } from "@repo/contracts/comments";
+import { findAllPostsSchema, paginatedPostsSchema, findByIdPostSchema, postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
+import { nullableStoryGroupSchema, getUserStoriesSchema, getFeedStoriesSchema, paginatedStoryGroupsSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
 
 const appRouter = t.router({
   users: t.router({
@@ -27,12 +27,12 @@ const appRouter = t.router({
       .input(userIdSchema)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     getFollowers: publicProcedure
-      .input(userIdSchema)
-      .output(z.array(userPreviewSchema))
+      .input(getFollowersSchema)
+      .output(paginatedUserPreviewsSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     getFollowing: publicProcedure
-      .input(userIdSchema)
-      .output(z.array(userPreviewSchema))
+      .input(getFollowingSchema)
+      .output(paginatedUserPreviewsSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     getSuggestedUsers: publicProcedure
       .output(z.array(userPreviewSchema))
@@ -52,7 +52,7 @@ const appRouter = t.router({
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     findByPostId: publicProcedure
       .input(getCommentsSchema)
-      .output(z.array(commentSchema))
+      .output(paginatedCommentsSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     delete: publicProcedure
       .input(deleteCommentSchema)
@@ -61,7 +61,7 @@ const appRouter = t.router({
   posts: t.router({
     findAll: publicProcedure
       .input(findAllPostsSchema)
-      .output(z.array(postSchema))
+      .output(paginatedPostsSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     findById: publicProcedure
       .input(findByIdPostSchema)
@@ -83,7 +83,8 @@ const appRouter = t.router({
       .output(nullableStoryGroupSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     getFeedStories: publicProcedure
-      .output(z.array(storyGroupSchema))
+      .input(getFeedStoriesSchema)
+      .output(paginatedStoryGroupsSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     create: publicProcedure
       .input(createStorySchema)

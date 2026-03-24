@@ -1,7 +1,11 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq, gt } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import type { CreateCommentInput, Comment } from '@repo/contracts/comments';
+import type {
+  CreateCommentInput,
+  Comment,
+  PaginatedComments,
+} from '@repo/contracts/comments';
 
 import { comment } from './schemas/schema';
 import { schema } from '../database/database.module';
@@ -28,25 +32,41 @@ export class CommentsService {
     return { id: created.id };
   }
 
-  async findByPostId(postId: number): Promise<Comment[]> {
+  async findByPostId(
+    postId: number,
+    cursor?: string | null,
+    limit = 20,
+  ): Promise<PaginatedComments> {
+    const conditions = [eq(comment.postId, postId)];
+    if (cursor) conditions.push(gt(comment.id, Number(cursor)));
+
     const comments = await this.database.query.comment.findMany({
-      where: eq(comment.postId, postId),
+      where: and(...conditions),
+      orderBy: [asc(comment.id)],
+      limit: limit + 1,
       with: {
         user: true,
       },
     });
 
-    return comments.map((currentComment) => ({
-      id: currentComment.id,
-      userId: currentComment.userId,
-      text: currentComment.text,
-      user: {
-        id: currentComment.user.id,
-        username: currentComment.user.name,
-        avatar: currentComment.user.image || '',
-      },
-      createdAt: currentComment.createdAt.toISOString(),
-    }));
+    const hasMore = comments.length > limit;
+    const items = hasMore ? comments.slice(0, limit) : comments;
+
+    return {
+      items: items.map((currentComment) => ({
+        id: currentComment.id,
+        userId: currentComment.userId,
+        text: currentComment.text,
+        user: {
+          id: currentComment.user.id,
+          username: currentComment.user.name,
+          avatar: currentComment.user.image || '',
+        },
+        createdAt: currentComment.createdAt.toISOString(),
+      })),
+      nextCursor: hasMore ? String(items[items.length - 1].id) : null,
+      hasMore,
+    };
   }
 
   async delete(commentId: number, userId: string) {

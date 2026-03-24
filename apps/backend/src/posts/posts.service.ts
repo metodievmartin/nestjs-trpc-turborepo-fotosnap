@@ -1,13 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreatePostInput, Post } from '@repo/contracts/posts';
-import { InferSelectModel } from 'drizzle-orm';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { CreatePostInput, PaginatedPosts, Post } from '@repo/contracts/posts';
+import { and, desc, eq, InferSelectModel, lt, or, SQL } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { like, post } from './schemas/schema';
 import { comment } from '../comments/schemas/schema';
 import { schema } from '../database/database.module';
 import { DATABASE_CONNECTION } from '../database/database-connection';
-import { and, desc, eq } from 'drizzle-orm';
 import { user } from '../auth/schema';
 
 type PostWithRelations = InferSelectModel<typeof post> & {
@@ -23,18 +22,56 @@ export class PostsService {
     private readonly database: NodePgDatabase<typeof schema>,
   ) {}
 
-  async findAll(userId: string, postUserId?: string): Promise<Post[]> {
+  async findAll(
+    userId: string,
+    postUserId?: string,
+    cursor?: string | null,
+    limit = 10,
+  ): Promise<PaginatedPosts> {
+    const conditions: SQL[] = [];
+    if (postUserId) conditions.push(eq(post.userId, postUserId));
+
+    // Compound cursor: "createdAt|id" — orders by creation time with id as tiebreaker
+    if (cursor) {
+      const parts = cursor.split('|');
+      if (parts.length !== 2) {
+        throw new BadRequestException('Invalid cursor format');
+      }
+      const [createdAtStr, idStr] = parts;
+      const createdAt = new Date(createdAtStr);
+      const id = Number(idStr);
+      if (isNaN(createdAt.getTime()) || isNaN(id)) {
+        throw new BadRequestException('Invalid cursor format');
+      }
+      // Seek past the cursor: rows older than createdAt, OR same createdAt but smaller id
+      const cursorCond = or(
+        lt(post.createdAt, createdAt),
+        and(eq(post.createdAt, createdAt), lt(post.id, id)),
+      );
+      if (cursorCond) conditions.push(cursorCond);
+    }
+
     const posts = await this.database.query.post.findMany({
       with: {
         user: true,
         likes: true,
         comments: true,
       },
-      where: postUserId ? eq(post.userId, postUserId) : undefined,
-      orderBy: [desc(post.createdAt)],
+      where: conditions.length > 0 ? and(...conditions) : undefined,
+      orderBy: [desc(post.createdAt), desc(post.id)],
+      limit: limit + 1, // fetch one extra to detect if there's a next page
     });
 
-    return posts.map((savedPost) => this.mapToPost(savedPost, userId));
+    const hasMore = posts.length > limit;
+    const items = hasMore ? posts.slice(0, limit) : posts;
+
+    return {
+      items: items.map((savedPost) => this.mapToPost(savedPost, userId)),
+      nextCursor: hasMore
+        ? `${items[items.length - 1].createdAt.toISOString()}|${items[items.length - 1].id}`
+        : null,
+      hasMore,
+    };
   }
 
   async findById(postId: number, userId: string): Promise<Post | null> {

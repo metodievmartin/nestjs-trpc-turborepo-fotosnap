@@ -30,7 +30,7 @@ export default function PostComments({ postId }: PostCommentsProps) {
 
   return (
     <Comments
-      comments={comments || []}
+      comments={comments?.items ?? []}
       currentUserId={currentUserId}
       onAddComment={addComment}
       onDeleteComment={removeComment}

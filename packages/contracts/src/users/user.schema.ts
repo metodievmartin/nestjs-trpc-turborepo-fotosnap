@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  cursorPaginationSchema,
+  paginatedSchema,
+} from '@repo/contracts/pagination';
 
 export const userPreviewSchema = z.object({
   id: z.string(),
@@ -29,7 +33,18 @@ export const userProfileSchema = z.object({
   isFollowing: z.boolean(),
 });
 
+export const getFollowersSchema = userIdSchema.extend(
+  cursorPaginationSchema.shape,
+);
+export const getFollowingSchema = userIdSchema.extend(
+  cursorPaginationSchema.shape,
+);
+export const paginatedUserPreviewsSchema = paginatedSchema(userPreviewSchema);
+
 export type UserPreview = z.infer<typeof userPreviewSchema>;
+export type PaginatedUserPreviews = z.infer<typeof paginatedUserPreviewsSchema>;
 export type UserIdInput = z.infer<typeof userIdSchema>;
+export type GetFollowersInput = z.infer<typeof getFollowersSchema>;
+export type GetFollowingInput = z.infer<typeof getFollowingSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type UserProfile = z.infer<typeof userProfileSchema>;

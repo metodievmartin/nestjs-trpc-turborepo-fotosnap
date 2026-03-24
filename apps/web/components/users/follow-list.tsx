@@ -16,14 +16,16 @@ interface FollowListProps {
 
 export function FollowList({ userId, type }: FollowListProps) {
   const { data: session } = authClient.useSession();
-  const { data: followers = [] } = trpc.users.getFollowers.useQuery(
+  const { data: followersData } = trpc.users.getFollowers.useQuery(
     { userId },
     { enabled: type === 'followers' }
   );
-  const { data: following = [] } = trpc.users.getFollowing.useQuery(
+  const { data: followingData } = trpc.users.getFollowing.useQuery(
     { userId },
     { enabled: type === 'following' }
   );
+  const followers = followersData?.items ?? [];
+  const following = followingData?.items ?? [];
   const { toggleFollow, pendingUserId } = useFollowUser(userId, {
     invalidateOnSuccess: true,
   });

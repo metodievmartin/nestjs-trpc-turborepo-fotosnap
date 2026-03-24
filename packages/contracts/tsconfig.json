@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "moduleResolution": "bundler",
+    "paths": {
+      "@repo/contracts/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

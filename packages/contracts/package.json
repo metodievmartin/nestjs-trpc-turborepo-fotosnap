@@ -18,6 +18,10 @@
     "./users": {
       "types": "./src/users/user.schema.ts",
       "default": "./src/users/user.schema.ts"
+    },
+    "./pagination": {
+      "types": "./src/pagination/pagination.schema.ts",
+      "default": "./src/pagination/pagination.schema.ts"
     }
   },
   "peerDependencies": {

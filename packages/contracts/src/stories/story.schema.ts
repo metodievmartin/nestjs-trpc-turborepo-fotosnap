@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  numericCursorPaginationSchema,
+  paginatedSchema,
+} from '@repo/contracts/pagination';
 
 export const createStorySchema = z.object({
   image: z
@@ -32,8 +36,13 @@ export const getUserStoriesSchema = z.object({
   userId: z.string().min(1),
 });
 
+export const getFeedStoriesSchema = numericCursorPaginationSchema;
+export const paginatedStoryGroupsSchema = paginatedSchema(storyGroupSchema);
+
 export type Story = z.infer<typeof storySchema>;
 export type StoryGroup = z.infer<typeof storyGroupSchema>;
 export type NullableStoryGroup = z.infer<typeof nullableStoryGroupSchema>;
+export type PaginatedStoryGroups = z.infer<typeof paginatedStoryGroupsSchema>;
 export type CreateStoryInput = z.infer<typeof createStorySchema>;
 export type GetUserStoriesInput = z.infer<typeof getUserStoriesSchema>;
+export type GetFeedStoriesInput = z.infer<typeof getFeedStoriesSchema>;

@@ -6,16 +6,17 @@ import {
   Router,
   UseMiddlewares,
 } from 'nestjs-trpc';
-import { z } from 'zod';
 
 import {
   nullableStoryGroupSchema,
-  storyGroupSchema,
+  paginatedStoryGroupsSchema,
+  getFeedStoriesSchema,
   storySchema,
   createStorySchema,
   getUserStoriesSchema,
   type CreateStoryInput,
   type GetUserStoriesInput,
+  type GetFeedStoriesInput,
 } from '@repo/contracts/stories';
 
 import { StoriesService } from './stories.service';
@@ -43,9 +44,19 @@ export class StoriesRouter {
     return this.storiesService.getUserStories(input.userId);
   }
 
-  @Query({ output: z.array(storyGroupSchema) })
-  async getFeedStories(@Ctx() context: TrpcSessionContext) {
-    return this.storiesService.getFeedStories(context.user.id);
+  @Query({
+    input: getFeedStoriesSchema,
+    output: paginatedStoryGroupsSchema,
+  })
+  async getFeedStories(
+    @Ctx() context: TrpcSessionContext,
+    @Input() input: GetFeedStoriesInput,
+  ) {
+    return this.storiesService.getFeedStories(
+      context.user.id,
+      input.cursor,
+      input.limit,
+    );
   }
 
   @Mutation({ input: createStorySchema, output: storySchema })

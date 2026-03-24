@@ -12,7 +12,12 @@ import {
   userIdSchema,
   updateProfileSchema,
   userProfileSchema,
+  getFollowersSchema,
+  getFollowingSchema,
+  paginatedUserPreviewsSchema,
   type UserIdInput,
+  type GetFollowersInput,
+  type GetFollowingInput,
   type UpdateProfileInput,
   userPreviewSchema,
 } from '@repo/contracts/users';
@@ -42,20 +47,36 @@ export class UsersRouter {
     return this.usersService.unfollow(context.user.id, input.userId);
   }
 
-  @Query({ input: userIdSchema, output: z.array(userPreviewSchema) })
+  @Query({
+    input: getFollowersSchema,
+    output: paginatedUserPreviewsSchema,
+  })
   async getFollowers(
-    @Input() input: UserIdInput,
+    @Input() input: GetFollowersInput,
     @Ctx() context: TrpcSessionContext,
   ) {
-    return this.usersService.getFollowers(input.userId, context.user.id);
+    return this.usersService.getFollowers(
+      input.userId,
+      context.user.id,
+      input.cursor,
+      input.limit,
+    );
   }
 
-  @Query({ input: userIdSchema, output: z.array(userPreviewSchema) })
+  @Query({
+    input: getFollowingSchema,
+    output: paginatedUserPreviewsSchema,
+  })
   async getFollowing(
-    @Input() input: UserIdInput,
+    @Input() input: GetFollowingInput,
     @Ctx() context: TrpcSessionContext,
   ) {
-    return this.usersService.getFollowing(input.userId, context.user.id);
+    return this.usersService.getFollowing(
+      input.userId,
+      context.user.id,
+      input.cursor,
+      input.limit,
+    );
   }
 
   @Query({ output: z.array(userPreviewSchema) })

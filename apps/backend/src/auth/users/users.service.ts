@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
+import { and, desc, eq, lt, ne, notInArray, or, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import {
+  type PaginatedUserPreviews,
   type UserPreview,
   type UpdateProfileInput,
   type UserProfile,
@@ -115,23 +116,117 @@ export class UsersService {
   async getFollowers(
     userId: string,
     currentUserId: string,
-  ): Promise<UserPreview[]> {
-    return this.database
-      .select(this.previewSelect(currentUserId))
-      .from(follow)
-      .innerJoin(user, eq(follow.followerId, user.id))
-      .where(eq(follow.followingId, userId));
+    cursor?: string | null,
+    limit = 20,
+  ): Promise<PaginatedUserPreviews> {
+    return this.paginateFollows(
+      follow.followingId,
+      follow.followerId,
+      userId,
+      currentUserId,
+      cursor,
+      limit,
+    );
   }
 
   async getFollowing(
     userId: string,
     currentUserId: string,
-  ): Promise<UserPreview[]> {
-    return this.database
-      .select(this.previewSelect(currentUserId))
+    cursor?: string | null,
+    limit = 20,
+  ): Promise<PaginatedUserPreviews> {
+    return this.paginateFollows(
+      follow.followerId,
+      follow.followingId,
+      userId,
+      currentUserId,
+      cursor,
+      limit,
+    );
+  }
+
+  // Shared pagination logic for getFollowers / getFollowing.
+  // filterColumn = the side we WHERE on (e.g. followingId for "who follows X")
+  // joinColumn   = the other side, joined to user table and used as cursor tiebreaker
+  private async paginateFollows(
+    filterColumn: typeof follow.followingId | typeof follow.followerId,
+    joinColumn: typeof follow.followerId | typeof follow.followingId,
+    userId: string,
+    currentUserId: string,
+    cursor?: string | null,
+    limit = 20,
+  ): Promise<PaginatedUserPreviews> {
+    const cursorCondition = cursor
+      ? this.parseFollowCursor(cursor, joinColumn)
+      : undefined;
+
+    const where = cursorCondition
+      ? and(eq(filterColumn, userId), cursorCondition)
+      : eq(filterColumn, userId);
+
+    const rows = await this.database
+      .select({
+        ...this.previewSelect(currentUserId),
+        followCreatedAt: follow.createdAt,
+        cursorId: joinColumn,
+      })
       .from(follow)
-      .innerJoin(user, eq(follow.followingId, user.id))
-      .where(eq(follow.followerId, userId));
+      .innerJoin(user, eq(joinColumn, user.id))
+      .where(where)
+      .orderBy(desc(follow.createdAt), desc(joinColumn))
+      .limit(limit + 1); // fetch one extra to detect if there's a next page
+
+    const hasMore = rows.length > limit;
+    const items = hasMore ? rows.slice(0, limit) : rows;
+
+    // Cursor format: "isoDate|userId" — see parseFollowCursor
+    let nextCursor: string | null = null;
+    if (hasMore) {
+      const last = items[items.length - 1];
+      nextCursor = `${last.followCreatedAt.toISOString()}|${last.cursorId}`;
+    }
+
+    return {
+      items: items.map((row) => ({
+        id: row.id,
+        name: row.name,
+        image: row.image,
+        isFollowing: row.isFollowing,
+      })),
+      nextCursor,
+      hasMore,
+    };
+  }
+
+  // Parses a "createdAt|id" cursor into a compound WHERE condition.
+  // Uses (createdAt, tiebreakColumn) ordering to handle timestamp ties.
+  private parseFollowCursor(
+    cursor: string,
+    tiebreakColumn: typeof follow.followerId | typeof follow.followingId,
+  ) {
+    const parts = cursor.split('|');
+    if (parts.length !== 2) {
+      throw new BadRequestException('Invalid cursor format');
+    }
+
+    const [createdAtStr, id] = parts;
+    const createdAt = new Date(createdAtStr);
+    if (isNaN(createdAt.getTime())) {
+      throw new BadRequestException('Invalid cursor format');
+    }
+
+    // Seek past the cursor: rows older than createdAt, OR same createdAt but smaller id.
+    // drizzle's or() can return undefined when given no args; the guard is for type safety.
+    const condition = or(
+      lt(follow.createdAt, createdAt),
+      and(eq(follow.createdAt, createdAt), lt(tiebreakColumn, id)),
+    );
+
+    if (!condition) {
+      throw new BadRequestException('Invalid cursor format');
+    }
+
+    return condition;
   }
 
   async getSuggestedUsers(userId: string): Promise<UserPreview[]> {

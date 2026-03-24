@@ -57,6 +57,13 @@
       "when": 1773653638659,
       "tag": "0007_add-followers-table",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774878747975,
+      "tag": "0008_add-pagination-indexes",
+      "breakpoints": true
     }
   ]
 }

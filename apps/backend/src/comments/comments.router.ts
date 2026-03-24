@@ -9,7 +9,7 @@ import {
 import { z } from 'zod';
 
 import {
-  commentSchema,
+  paginatedCommentsSchema,
   getCommentsSchema,
   createCommentSchema,
   deleteCommentSchema,
@@ -37,9 +37,13 @@ export class CommentsRouter {
     return this.commentsService.create(createCommentInput, context.user.id);
   }
 
-  @Query({ input: getCommentsSchema, output: z.array(commentSchema) })
+  @Query({ input: getCommentsSchema, output: paginatedCommentsSchema })
   async findByPostId(@Input() getCommentsInput: GetCommentsInput) {
-    return this.commentsService.findByPostId(getCommentsInput.postId);
+    return this.commentsService.findByPostId(
+      getCommentsInput.postId,
+      getCommentsInput.cursor,
+      getCommentsInput.limit,
+    );
   }
 
   @Mutation({ input: deleteCommentSchema })

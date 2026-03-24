@@ -1,8 +1,14 @@
 import { z } from 'zod';
+import {
+  cursorPaginationSchema,
+  paginatedSchema,
+} from '@repo/contracts/pagination';
 
-export const findAllPostsSchema = z.object({
-  userId: z.string().optional(),
-});
+export const findAllPostsSchema = z
+  .object({
+    userId: z.string().optional(),
+  })
+  .extend(cursorPaginationSchema.shape);
 
 export const createPostSchema = z.object({
   image: z.string().min(1, 'Image is required'),
@@ -32,7 +38,10 @@ export const likePostSchema = z.object({
   postId: z.number(),
 });
 
+export const paginatedPostsSchema = paginatedSchema(postSchema);
+
 export type Post = z.infer<typeof postSchema>;
+export type PaginatedPosts = z.infer<typeof paginatedPostsSchema>;
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type LikePostInput = z.infer<typeof likePostSchema>;
 export type FindByIdPostInput = z.infer<typeof findByIdPostSchema>;

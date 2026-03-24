@@ -6,10 +6,10 @@ import {
   UseMiddlewares,
   Ctx,
 } from 'nestjs-trpc';
-import { z } from 'zod';
 
 import {
   postSchema,
+  paginatedPostsSchema,
   likePostSchema,
   createPostSchema,
   findAllPostsSchema,
@@ -29,12 +29,17 @@ import type { TrpcSessionContext } from '../app-context.interface';
 export class PostsRouter {
   constructor(private postsService: PostsService) {}
 
-  @Query({ output: z.array(postSchema), input: findAllPostsSchema })
+  @Query({ output: paginatedPostsSchema, input: findAllPostsSchema })
   async findAll(
     @Ctx() context: TrpcSessionContext,
     @Input() findAllPostsInput: FindAllPostsInput,
   ) {
-    return this.postsService.findAll(context.user.id, findAllPostsInput.userId);
+    return this.postsService.findAll(
+      context.user.id,
+      findAllPostsInput.userId,
+      findAllPostsInput.cursor,
+      findAllPostsInput.limit,
+    );
   }
 
   @Query({ output: postSchema.nullable(), input: findByIdPostSchema })

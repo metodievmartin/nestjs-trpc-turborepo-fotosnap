@@ -24,7 +24,8 @@ export default function ProfilePage() {
   const [isAvatarUploadOpen, setIsAvatarUploadOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const { data: session } = authClient.useSession();
-  const { data: posts = [] } = trpc.posts.findAll.useQuery({ userId });
+  const { data: postsData } = trpc.posts.findAll.useQuery({ userId });
+  const posts = postsData?.items ?? [];
   const { data: profile, isLoading } = trpc.users.getUserProfile.useQuery({
     userId,
   });
