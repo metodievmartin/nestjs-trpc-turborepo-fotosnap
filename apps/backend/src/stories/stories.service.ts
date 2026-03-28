@@ -127,7 +127,7 @@ export class StoriesService {
 
     return {
       userId: first.userId,
-      username: first.user.name,
+      username: first.user.username,
       avatar: first.user.image || '',
       stories: fetchedStories.map((s) => this.toStory(s)),
     };
@@ -138,7 +138,7 @@ export class StoriesService {
       id: fetchedStory.id,
       user: {
         id: fetchedStory.user.id,
-        username: fetchedStory.user.name,
+        username: fetchedStory.user.username,
         avatar: fetchedStory.user.image || '',
       },
       image: fetchedStory.image,

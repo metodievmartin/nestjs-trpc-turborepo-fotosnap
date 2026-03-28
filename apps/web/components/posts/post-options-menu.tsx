@@ -15,14 +15,14 @@ import {
 
 interface PostOptionsMenuProps {
   postId: number;
-  userId: string;
+  username: string;
   showOpenPost?: boolean;
   className?: string;
 }
 
 export function PostOptionsMenu({
   postId,
-  userId,
+  username,
   showOpenPost = false,
   className,
 }: PostOptionsMenuProps) {
@@ -56,7 +56,7 @@ export function PostOptionsMenu({
             Open post
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => router.push(`/users/${userId}`)}>
+        <DropdownMenuItem onClick={() => router.push(`/users/${username}`)}>
           <User className="h-4 w-4 mr-2" />
           Go to profile
         </DropdownMenuItem>

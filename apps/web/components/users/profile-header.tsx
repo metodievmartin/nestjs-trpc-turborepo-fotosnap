@@ -23,7 +23,13 @@ interface ProfileHeaderProps {
   isOwnProfile: boolean;
 }
 
-function Bio({ bio, website }: { bio?: string | null; website?: string | null }) {
+function Bio({
+  bio,
+  website,
+}: {
+  bio?: string | null;
+  website?: string | null;
+}) {
   if (!bio && !website) return null;
 
   return (
@@ -64,7 +70,7 @@ export default function ProfileHeader({
         <div className="relative shrink-0">
           <UserAvatar
             src={profile.image}
-            alt={profile.name}
+            alt={profile.username}
             size="xl"
             className="border-2 md:w-32 md:h-32"
             iconClassName="md:w-12 md:h-12"
@@ -85,7 +91,7 @@ export default function ProfileHeader({
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-center gap-2">
             <h1 className="text-xl md:text-2xl font-normal truncate">
-              {profile.name}
+              {profile.username}
             </h1>
             <div className="flex gap-2 shrink-0">
               {!isOwnProfile && (
@@ -135,14 +141,14 @@ export default function ProfileHeader({
               <span className="text-muted-foreground">posts</span>
             </div>
             <Link
-              href={`/users/${profile.id}/followers`}
+              href={`/users/${profile.username}/followers`}
               className="hover:opacity-80"
             >
               <span className="font-semibold">{profile.followerCount}</span>{' '}
               <span className="text-muted-foreground">followers</span>
             </Link>
             <Link
-              href={`/users/${profile.id}/following`}
+              href={`/users/${profile.username}/following`}
               className="hover:opacity-80"
             >
               <span className="font-semibold">{profile.followingCount}</span>{' '}
@@ -151,6 +157,9 @@ export default function ProfileHeader({
           </div>
 
           <div className="hidden md:block">
+            {profile.displayName && (
+              <div className="text-sm font-semibold">{profile.displayName}</div>
+            )}
             <Bio bio={profile.bio} website={profile.website} />
           </div>
         </div>
@@ -158,6 +167,9 @@ export default function ProfileHeader({
 
       {/* Bio below on mobile — avoids cramping the horizontal layout */}
       <div className="mt-4 md:hidden">
+        {profile.displayName && (
+          <div className="text-sm font-semibold">{profile.displayName}</div>
+        )}
         <Bio bio={profile.bio} website={profile.website} />
       </div>
     </div>

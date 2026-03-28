@@ -152,7 +152,6 @@ export default function StoryCard({
 
       <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-between px-4 pt-2">
         <UserProfileLink
-          userId={storyGroup.userId}
           username={storyGroup.username}
           avatar={storyGroup.avatar}
           avatarClassName="border-2 border-white"

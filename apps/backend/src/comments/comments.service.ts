@@ -59,7 +59,7 @@ export class CommentsService {
         text: currentComment.text,
         user: {
           id: currentComment.user.id,
-          username: currentComment.user.name,
+          username: currentComment.user.username,
           avatar: currentComment.user.image || '',
         },
         createdAt: currentComment.createdAt.toISOString(),

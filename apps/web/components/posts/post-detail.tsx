@@ -55,11 +55,7 @@ export function PostDetail({ postId }: PostDetailProps) {
 
   const caption = (
     <div className="mb-3">
-      <PostCaption
-        userId={post.user.id}
-        username={post.user.username}
-        caption={post.caption}
-      />
+      <PostCaption username={post.user.username} caption={post.caption} />
     </div>
   );
 
@@ -109,13 +105,12 @@ export function PostDetail({ postId }: PostDetailProps) {
           <ArrowLeft className="size-4" />
         </Button>
         <UserProfileLink
-          userId={post.user.id}
           username={post.user.username}
           avatar={post.user.avatar}
         />
         <PostOptionsMenu
           postId={post.id}
-          userId={post.user.id}
+          username={post.user.username}
           className="ml-auto -mr-2"
         />
       </div>
@@ -172,13 +167,12 @@ export function PostDetail({ postId }: PostDetailProps) {
       <div className="flex flex-col h-full bg-background">
         <div className="flex items-center px-4 py-3 border-b">
           <UserProfileLink
-            userId={post.user.id}
             username={post.user.username}
             avatar={post.user.avatar}
           />
           <PostOptionsMenu
             postId={post.id}
-            userId={post.user.id}
+            username={post.user.username}
             className="ml-auto -mr-2"
           />
         </div>

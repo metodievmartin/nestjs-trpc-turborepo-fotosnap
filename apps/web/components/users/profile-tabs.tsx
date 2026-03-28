@@ -9,14 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 interface ProfileTabsProps {
   userPosts: Post[];
   savedPosts: Post[];
-  name: string;
+  username: string;
   onPostClick?: (post: Post) => void;
 }
 
 export function ProfileTabs({
   userPosts,
   savedPosts,
-  name,
+  username,
   onPostClick,
 }: ProfileTabsProps) {
   return (
@@ -37,7 +37,7 @@ export function ProfileTabs({
           <EmptyState
             icon={Grid}
             title="No Posts Yet"
-            description={`When ${name} shares photos, they'll appear here`}
+            description={`When ${username} shares photos, they'll appear here`}
           />
         ) : (
           <PostsGrid posts={userPosts} onPostClick={onPostClick} />

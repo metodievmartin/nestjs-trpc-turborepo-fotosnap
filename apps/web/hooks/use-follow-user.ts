@@ -11,7 +11,7 @@ interface UseFollowUserOptions {
 }
 
 export function useFollowUser(
-  profileUserId: string,
+  profileUsername: string,
   options?: UseFollowUserOptions
 ) {
   const utils = trpc.useUtils();
@@ -28,7 +28,7 @@ export function useFollowUser(
     );
 
   const invalidate = () => {
-    utils.users.getUserProfile.invalidate({ userId: profileUserId });
+    utils.users.getUserByUsername.invalidate({ username: profileUsername });
     utils.users.getFollowers.invalidate();
     utils.users.getFollowing.invalidate();
     utils.users.getSuggestedUsers.invalidate();

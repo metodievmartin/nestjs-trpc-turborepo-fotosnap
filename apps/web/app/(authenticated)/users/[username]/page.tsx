@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
@@ -19,17 +19,24 @@ import { ProfilePageSkeleton } from '@/components/users/profile-page-skeleton';
 
 export default function ProfilePage() {
   const params = useParams();
-  const userId = params.userId as string;
+  const router = useRouter();
+  const username = params.username as string;
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isAvatarUploadOpen, setIsAvatarUploadOpen] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const { data: session } = authClient.useSession();
-  const { data: postsData } = trpc.posts.findAll.useQuery({ userId });
-  const posts = postsData?.items ?? [];
-  const { data: profile, isLoading } = trpc.users.getUserProfile.useQuery({
-    userId,
+  const { data: profile, isLoading } = trpc.users.getUserByUsername.useQuery({
+    username,
   });
-  const { toggleFollow, isPending: isFollowPending } = useFollowUser(userId, {
+
+  const userId = profile?.id;
+
+  const { data: postsData } = trpc.posts.findAll.useQuery(
+    { userId: userId ?? '' },
+    { enabled: !!userId }
+  );
+  const posts = postsData?.items ?? [];
+  const { toggleFollow, isPending: isFollowPending } = useFollowUser(username, {
     invalidateOnSuccess: true,
   });
 
@@ -37,8 +44,11 @@ export default function ProfilePage() {
     updateProfile,
     isPending: isUpdateProfilePending,
     error: updateProfileError,
-  } = useUpdateProfile(userId, () => setIsEditProfileOpen(false));
-  const { updateAvatar } = useUpdateAvatar(userId);
+  } = useUpdateProfile(username, {
+    onSuccess: () => setIsEditProfileOpen(false),
+    onUsernameChange: (newUsername) => router.replace(`/users/${newUsername}`),
+  });
+  const { updateAvatar } = useUpdateAvatar(username);
 
   const handleFollowToggle = () => {
     if (!profile) return;
@@ -74,7 +84,7 @@ export default function ProfilePage() {
       <ProfileTabs
         userPosts={posts}
         savedPosts={[]}
-        name={profile.name}
+        username={profile.username}
         onPostClick={(post) => setSelectedPostId(post.id)}
       />
 

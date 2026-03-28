@@ -9,4 +9,24 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 
 export const auth = betterAuth({
   database: drizzleAdapter({}, { provider: 'pg' }),
+  user: {
+    fields: {
+      name: 'username',
+    },
+    additionalFields: {
+      displayName: {
+        type: 'string',
+        required: false,
+        fieldName: 'display_name',
+      },
+      bio: {
+        type: 'string',
+        required: false,
+      },
+      website: {
+        type: 'string',
+        required: false,
+      },
+    },
+  },
 });

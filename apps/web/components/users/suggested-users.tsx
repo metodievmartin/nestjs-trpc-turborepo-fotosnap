@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 
 import { trpc } from '@/lib/trpc/client';
-import { authClient } from '@/lib/auth/client';
+import { authClient, getSessionUsername } from '@/lib/auth/client';
 
 import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
@@ -25,7 +25,7 @@ export function SuggestedUsers({
   const { data: session } = authClient.useSession();
   const { data: users, isLoading } = trpc.users.getSuggestedUsers.useQuery();
   const { toggleFollow, pendingUserId } = useFollowUser(
-    session?.user.id ?? '',
+    getSessionUsername(session) ?? '',
     { invalidateOnSuccess: true }
   );
 
@@ -49,16 +49,16 @@ export function SuggestedUsers({
             className="flex flex-col items-center gap-2.5 p-2 w-32 shrink-0"
           >
             <Link
-              href={`/users/${user.id}`}
+              href={`/users/${user.username}`}
               className="hover:opacity-80 transition-opacity"
             >
-              <UserAvatar src={user.image} alt={user.name} size="xl" />
+              <UserAvatar src={user.image} alt={user.username} size="xl" />
             </Link>
             <Link
-              href={`/users/${user.id}`}
+              href={`/users/${user.username}`}
               className="font-semibold text-sm truncate max-w-full hover:opacity-80 transition-opacity"
             >
-              {user.name}
+              {user.username}
             </Link>
             <Button
               variant="ghost"

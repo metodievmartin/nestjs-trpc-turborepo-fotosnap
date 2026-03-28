@@ -20,8 +20,8 @@ const labels = {
 export default function FollowListPage({ type }: FollowListPageProps) {
   const params = useParams();
   const router = useRouter();
-  const userId = params.userId as string;
-  const { data: profile } = trpc.users.getUserProfile.useQuery({ userId });
+  const username = params.username as string;
+  const { data: profile } = trpc.users.getUserByUsername.useQuery({ username });
 
   const label = labels[type];
 
@@ -37,11 +37,17 @@ export default function FollowListPage({ type }: FollowListPageProps) {
           <ArrowLeft className="size-5" />
         </Button>
         <h1 className="text-lg font-semibold">
-          {profile?.name ? `${profile.name}'s ${label}` : label}
+          {profile?.username ? `${profile.username}'s ${label}` : label}
         </h1>
       </div>
       <div className="px-4">
-        <FollowList userId={userId} type={type} />
+        {profile && (
+          <FollowList
+            userId={profile.id}
+            username={profile.username}
+            type={type}
+          />
+        )}
       </div>
     </PageContainer>
   );

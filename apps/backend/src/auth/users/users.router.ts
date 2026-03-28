@@ -10,12 +10,14 @@ import {
 
 import {
   userIdSchema,
+  usernameParamSchema,
   updateProfileSchema,
   userProfileSchema,
   getFollowersSchema,
   getFollowingSchema,
   paginatedUserPreviewsSchema,
   type UserIdInput,
+  type UsernameParamInput,
   type GetFollowersInput,
   type GetFollowingInput,
   type UpdateProfileInput,
@@ -98,5 +100,13 @@ export class UsersRouter {
     @Ctx() context: TrpcSessionContext,
   ) {
     return this.usersService.getUserProfile(input.userId, context.user.id);
+  }
+
+  @Query({ input: usernameParamSchema, output: userProfileSchema })
+  async getUserByUsername(
+    @Input() input: UsernameParamInput,
+    @Ctx() context: TrpcSessionContext,
+  ) {
+    return this.usersService.getUserByUsername(input.username, context.user.id);
   }
 }

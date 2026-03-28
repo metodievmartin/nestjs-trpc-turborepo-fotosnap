@@ -26,14 +26,13 @@ export default function PostCard({ post }: PostCardProps) {
     <article className="border">
       <div className="flex items-center justify-between p-4">
         <UserProfileLink
-          userId={post.user.id}
           username={post.user.username}
           avatar={post.user.avatar}
           avatarSize="md"
         />
         <PostOptionsMenu
           postId={post.id}
-          userId={post.user.id}
+          username={post.user.username}
           showOpenPost
           className="-mr-2"
         />
@@ -52,11 +51,7 @@ export default function PostCard({ post }: PostCardProps) {
 
         <PostLikesCount likes={post.likes} />
 
-        <PostCaption
-          userId={post.user.id}
-          username={post.user.username}
-          caption={post.caption}
-        />
+        <PostCaption username={post.user.username} caption={post.caption} />
 
         {post.comments > 0 && (
           <button

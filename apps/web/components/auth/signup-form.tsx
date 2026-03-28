@@ -31,7 +31,7 @@ interface SignupFormProps {
 }
 
 const defaultValues = {
-  name: '',
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -73,15 +73,15 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
           >
             <FormRootError />
             <FormField
-              name="name"
+              name="username"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
                     <Input
-                      type="name"
-                      placeholder="Enter your full name"
+                      type="text"
+                      placeholder="Choose a username"
                       disabled={isSubmitting}
                       {...field}
                     />

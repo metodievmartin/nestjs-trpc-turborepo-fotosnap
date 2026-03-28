@@ -2,14 +2,26 @@
 
 import { usePathname } from 'next/navigation';
 
-import { authClient } from '@/lib/auth/client';
+import { authClient, getSessionUsername } from '@/lib/auth/client';
 import { navItems, type NavAction, type NavItem } from '@/lib/navigation';
 import type { LucideIcon } from 'lucide-react';
 
 /** Nav item after resolving actions to onClick handlers and computing active state. */
 export type ResolvedNavItem =
-  | { id: string; icon: LucideIcon; label: string; href: string; active: boolean }
-  | { id: string; icon: LucideIcon; label: string; onClick: () => void; active: boolean };
+  | {
+      id: string;
+      icon: LucideIcon;
+      label: string;
+      href: string;
+      active: boolean;
+    }
+  | {
+      id: string;
+      icon: LucideIcon;
+      label: string;
+      onClick: () => void;
+      active: boolean;
+    };
 
 /** Profile nav item — separated because it uses an avatar instead of an icon. */
 export interface ProfileNavItem {
@@ -44,7 +56,7 @@ function toId(label: string): string {
 export function useNavItems({ actions }: { actions: ActionHandlers }) {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
-  const userId = session?.user.id;
+  const username = getSessionUsername(session);
 
   const items: ResolvedNavItem[] = navItems.map((item) => {
     const base = {
@@ -63,11 +75,11 @@ export function useNavItems({ actions }: { actions: ActionHandlers }) {
 
   const profileItem: ProfileNavItem = {
     label: 'Profile',
-    href: userId ? `/users/${userId}` : '#',
+    href: username ? `/users/${username}` : '#',
     active:
-      !!userId &&
-      (pathname === `/users/${userId}` ||
-        pathname.startsWith(`/users/${userId}/`)),
+      !!username &&
+      (pathname === `/users/${username}` ||
+        pathname.startsWith(`/users/${username}/`)),
     image: session?.user.image,
   };
 

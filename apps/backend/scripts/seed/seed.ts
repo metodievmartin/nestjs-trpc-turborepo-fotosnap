@@ -49,21 +49,35 @@ const AVATARS_DIR = path.resolve(__dirname, 'avatars');
 
 const FOLLOW_PAIRS: [number, number][] = [
   // Cluster 1: valentina(0), daniel(1), marco(3)
-  [0, 1], [1, 0], [0, 3], [3, 0], [1, 3],
+  [0, 1],
+  [1, 0],
+  [0, 3],
+  [3, 0],
+  [1, 3],
   // Cluster 2: rowan(2), hannah(4), ryan(10)
-  [2, 4], [4, 2], [10, 2], [10, 4],
+  [2, 4],
+  [4, 2],
+  [10, 2],
+  [10, 4],
   // Cluster 3: jay(5), nina(7), elena(8)
-  [5, 7], [7, 5], [8, 5], [8, 7],
+  [5, 7],
+  [7, 5],
+  [8, 5],
+  [8, 7],
   // Cross-cluster bridges
-  [0, 8],  // valentina follows elena (fashion meets golden-hour portraits)
-  [1, 5],  // daniel follows jay (music meets urban creative)
-  [4, 8],  // hannah follows elena (plants meets golden hour)
+  [0, 8], // valentina follows elena (fashion meets golden-hour portraits)
+  [1, 5], // daniel follows jay (music meets urban creative)
+  [4, 8], // hannah follows elena (plants meets golden hour)
   // claire(6) and toby(9) — tech duo, few connections
-  [6, 9], [9, 6],
+  [6, 9],
+  [9, 6],
   // sam(11) follows a handful but nobody follows back (lurker)
-  [11, 0], [11, 3], [11, 8],
+  [11, 0],
+  [11, 3],
+  [11, 8],
   // priya(12) — one mutual with rowan
-  [12, 2], [2, 12],
+  [12, 2],
+  [2, 12],
   // alex.lifts(13) and mina(14) — completely isolated, zero follows
 ];
 
@@ -86,7 +100,9 @@ function copyAvatars(): Map<string, string> {
 
     const src = path.join(AVATARS_DIR, seedUser.avatar);
     if (!fs.existsSync(src)) {
-      console.log(`  Avatar not found for ${seedUser.name}: ${seedUser.avatar}`);
+      console.log(
+        `  Avatar not found for ${seedUser.username}: ${seedUser.avatar}`,
+      );
       continue;
     }
     const dest = path.join(UPLOADS_DIR, seedUser.avatar);
@@ -120,6 +136,26 @@ async function seed() {
     database: drizzleAdapter(db, { provider: 'pg' }),
     baseURL: 'http://localhost:4000',
     emailAndPassword: { enabled: true },
+    user: {
+      fields: {
+        name: 'username',
+      },
+      additionalFields: {
+        displayName: {
+          type: 'string',
+          required: false,
+          fieldName: 'display_name',
+        },
+        bio: {
+          type: 'string',
+          required: false,
+        },
+        website: {
+          type: 'string',
+          required: false,
+        },
+      },
+    },
   });
 
   // --- Copy images ---
@@ -144,7 +180,7 @@ async function seed() {
       .limit(1);
 
     if (existing.length > 0) {
-      console.log(`  Skipped (exists): ${seedUser.name}`);
+      console.log(`  Skipped (exists): ${seedUser.username}`);
       userIds.push(existing[0].id);
       continue;
     }
@@ -152,7 +188,7 @@ async function seed() {
     // Create via Better Auth — this populates user + account tables
     const result = await auth.api.signUpEmail({
       body: {
-        name: seedUser.name,
+        name: seedUser.username,
         email: seedUser.email,
         password: SEED_PASSWORD,
         image: avatarMap.get(seedUser.email) ?? undefined,
@@ -172,7 +208,7 @@ async function seed() {
       })
       .where(eq(authSchema.user.id, userId));
 
-    console.log(`  Created: ${seedUser.name} (${userId})`);
+    console.log(`  Created: ${seedUser.username} (${userId})`);
   }
 
   // --- Create follow relationships ---

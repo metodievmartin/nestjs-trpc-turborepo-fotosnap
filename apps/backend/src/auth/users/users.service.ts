@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -18,7 +19,10 @@ import { follow, user } from '../schema';
 import { post } from '../../posts/schemas/schema';
 import { schema } from '../../database/database.module';
 import { DATABASE_CONNECTION } from '../../database/database-connection';
-import { isForeignKeyViolation } from '../../database/database-errors';
+import {
+  isForeignKeyViolation,
+  isUniqueViolation,
+} from '../../database/database-errors';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +34,7 @@ export class UsersService {
   private previewSelect(currentUserId: string) {
     return {
       id: user.id,
-      name: user.name,
+      username: user.username,
       image: user.image,
       isFollowing: sql<boolean>`EXISTS(
         SELECT 1
@@ -44,6 +48,7 @@ export class UsersService {
   private profileSelect(currentUserId: string) {
     return {
       ...this.previewSelect(currentUserId),
+      displayName: user.displayName,
       bio: user.bio,
       website: user.website,
       followerCount: sql<number>`(
@@ -189,7 +194,7 @@ export class UsersService {
     return {
       items: items.map((row) => ({
         id: row.id,
-        name: row.name,
+        username: row.username,
         image: row.image,
         isFollowing: row.isFollowing,
       })),
@@ -264,17 +269,40 @@ export class UsersService {
     return result[0];
   }
 
-  async updateProfile(userId: string, updates: UpdateProfileInput) {
-    const updated = await this.database
-      .update(user)
-      .set(updates)
-      .where(eq(user.id, userId))
-      .returning();
+  async getUserByUsername(
+    username: string,
+    currentUserId: string,
+  ): Promise<UserProfile> {
+    const result = await this.database
+      .select(this.profileSelect(currentUserId))
+      .from(user)
+      .where(eq(user.username, username));
 
-    if (updated.length === 0) {
+    if (!result[0]) {
       throw new NotFoundException('User not found');
     }
 
-    return { success: true };
+    return result[0];
+  }
+
+  async updateProfile(userId: string, updates: UpdateProfileInput) {
+    try {
+      const updated = await this.database
+        .update(user)
+        .set(updates)
+        .where(eq(user.id, userId))
+        .returning();
+
+      if (updated.length === 0) {
+        throw new NotFoundException('User not found');
+      }
+
+      return { success: true };
+    } catch (e) {
+      if (isUniqueViolation(e)) {
+        throw new ConflictException('Username is already taken');
+      }
+      throw e;
+    }
   }
 }

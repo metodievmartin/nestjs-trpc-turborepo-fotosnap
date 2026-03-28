@@ -11,10 +11,11 @@ export type FollowListType = 'followers' | 'following';
 
 interface FollowListProps {
   userId: string;
+  username: string;
   type: FollowListType;
 }
 
-export function FollowList({ userId, type }: FollowListProps) {
+export function FollowList({ userId, username, type }: FollowListProps) {
   const { data: session } = authClient.useSession();
   const { data: followersData } = trpc.users.getFollowers.useQuery(
     { userId },
@@ -26,7 +27,7 @@ export function FollowList({ userId, type }: FollowListProps) {
   );
   const followers = followersData?.items ?? [];
   const following = followingData?.items ?? [];
-  const { toggleFollow, pendingUserId } = useFollowUser(userId, {
+  const { toggleFollow, pendingUserId } = useFollowUser(username, {
     invalidateOnSuccess: true,
   });
 
@@ -45,8 +46,7 @@ export function FollowList({ userId, type }: FollowListProps) {
       {users.map((user) => (
         <div key={user.id} className="flex items-center justify-between">
           <UserProfileLink
-            userId={user.id}
-            username={user.name}
+            username={user.username}
             avatar={user.image}
             avatarSize="md"
             className="flex-1 min-w-0"

@@ -45,6 +45,29 @@ import { StoriesModule } from './stories/stories.module';
           emailAndPassword: {
             enabled: true,
           },
+
+          // Map better-auth's core `name` field to the `username` DB column.
+          // Additional custom columns are declared via additionalFields.
+          user: {
+            fields: {
+              name: 'username',
+            },
+            additionalFields: {
+              displayName: {
+                type: 'string',
+                required: false,
+                fieldName: 'display_name',
+              },
+              bio: {
+                type: 'string',
+                required: false,
+              },
+              website: {
+                type: 'string',
+                required: false,
+              },
+            },
+          },
         }),
       }),
       // Tokens injected into useFactory in the same order as the factory params.

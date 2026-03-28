@@ -13,7 +13,7 @@ import { z } from "zod";
 
 const t = initTRPC.create();
 const publicProcedure = t.procedure;
-import { userIdSchema, getFollowersSchema, paginatedUserPreviewsSchema, getFollowingSchema, userPreviewSchema, updateProfileSchema, userProfileSchema } from "@repo/contracts/users";
+import { userIdSchema, getFollowersSchema, paginatedUserPreviewsSchema, getFollowingSchema, userPreviewSchema, updateProfileSchema, userProfileSchema, usernameParamSchema } from "@repo/contracts/users";
 import { createCommentSchema, getCommentsSchema, paginatedCommentsSchema, deleteCommentSchema } from "@repo/contracts/comments";
 import { findAllPostsSchema, paginatedPostsSchema, findByIdPostSchema, postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
 import { nullableStoryGroupSchema, getUserStoriesSchema, getFeedStoriesSchema, paginatedStoryGroupsSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
@@ -42,6 +42,10 @@ const appRouter = t.router({
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     getUserProfile: publicProcedure
       .input(userIdSchema)
+      .output(userProfileSchema)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getUserByUsername: publicProcedure
+      .input(usernameParamSchema)
       .output(userProfileSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
     }),

@@ -6,7 +6,6 @@ import UserAvatar from './user-avatar';
 type AvatarSize = React.ComponentProps<typeof UserAvatar>['size'];
 
 interface UserProfileLinkProps {
-  userId: string;
   username: string;
   avatar?: string | null;
   avatarSize?: AvatarSize;
@@ -16,7 +15,6 @@ interface UserProfileLinkProps {
 }
 
 export default function UserProfileLink({
-  userId,
   username,
   avatar,
   avatarSize = 'sm',
@@ -26,7 +24,7 @@ export default function UserProfileLink({
 }: UserProfileLinkProps) {
   return (
     <Link
-      href={`/users/${userId}`}
+      href={`/users/${username}`}
       onClick={onClick}
       className={cn(
         'flex items-center gap-3 hover:opacity-80 transition-opacity',

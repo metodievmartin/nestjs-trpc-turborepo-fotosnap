@@ -47,7 +47,8 @@ export function EditProfileModal({
   const form = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     values: {
-      name: profile.name,
+      username: profile.username,
+      displayName: profile.displayName || '',
       bio: profile.bio || '',
       website: profile.website || '',
     },
@@ -79,12 +80,37 @@ export function EditProfileModal({
 
             <FormField
               control={form.control}
-              name="name"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your name" maxLength={50} {...field} />
+                    <Input
+                      placeholder="your_username"
+                      maxLength={30}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Lowercase letters, numbers, underscores, and periods
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="displayName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Your full name"
+                      maxLength={50}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

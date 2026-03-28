@@ -1,4 +1,5 @@
 import z from 'zod';
+import { usernameSchema } from '@repo/contracts/users';
 
 export const loginSchema = z.object({
   email: z.email('Please enter a valid email address'),
@@ -9,7 +10,7 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 
 export const signupSchema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
+    username: usernameSchema,
     email: z.email('Please enter a valid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
