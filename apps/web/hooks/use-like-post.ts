@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 
-import { Post } from '@repo/contracts/posts';
+import { Post, PaginatedPosts } from '@repo/contracts/posts';
 import { trpc } from '@/lib/trpc/client';
 
 export function useLikePost(postId: number) {
@@ -32,7 +32,7 @@ export function useLikePost(postId: number) {
       ]);
 
       const previousPost = utils.posts.findById.getData({ postId });
-      const previousAllQueries = queryClient.getQueriesData<Post[]>({
+      const previousAllQueries = queryClient.getQueriesData<PaginatedPosts>({
         queryKey: findAllQueryKey,
       });
 
@@ -43,11 +43,15 @@ export function useLikePost(postId: number) {
       });
 
       // Optimistic update on ALL findAll variants (feed, profile grid, etc.)
-      queryClient.setQueriesData<Post[]>(
+      // findAll returns paginated data: { items: Post[], nextCursor, hasMore }
+      queryClient.setQueriesData<PaginatedPosts>(
         { queryKey: findAllQueryKey },
         (old) => {
           if (!old) return old;
-          return old.map((p) => (p.id === postId ? toggleLike(p) : p));
+          return {
+            ...old,
+            items: old.items.map((p) => (p.id === postId ? toggleLike(p) : p)),
+          };
         }
       );
 
