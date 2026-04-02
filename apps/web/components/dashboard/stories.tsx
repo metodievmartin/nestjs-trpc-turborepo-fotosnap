@@ -17,8 +17,7 @@ type ViewerState =
 
 export default function Stories() {
   const { data: ownStoryGroup } = trpc.stories.getOwnStories.useQuery();
-  const { data: feedStoriesData } =
-    trpc.stories.getFeedStories.useQuery({});
+  const { data: feedStoriesData } = trpc.feed.getStoryFeed.useQuery({});
   const otherStoryGroups = feedStoriesData?.items ?? [];
   const { createStory } = useCreateStory();
   const { data: session } = authClient.useSession();

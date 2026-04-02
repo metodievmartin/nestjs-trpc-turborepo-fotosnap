@@ -19,6 +19,10 @@
       "types": "./src/users/user.schema.ts",
       "default": "./src/users/user.schema.ts"
     },
+    "./feed": {
+      "types": "./src/feed/feed.schema.ts",
+      "default": "./src/feed/feed.schema.ts"
+    },
     "./pagination": {
       "types": "./src/pagination/pagination.schema.ts",
       "default": "./src/pagination/pagination.schema.ts"

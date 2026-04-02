@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { and, desc, eq, lt, ne, notInArray, or, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
@@ -23,12 +24,15 @@ import {
   isForeignKeyViolation,
   isUniqueViolation,
 } from '../../database/database-errors';
+import { UserFollowedEvent } from '../../feed/events/user-followed.event';
+import { UserUnfollowedEvent } from '../../feed/events/user-unfollowed.event';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly database: NodePgDatabase<typeof schema>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private previewSelect(currentUserId: string) {
@@ -87,10 +91,23 @@ export class UsersService {
     }
 
     try {
-      await this.database
+      const result = await this.database
         .insert(follow)
         .values({ followerId, followingId })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning();
+
+      if (result.length > 0) {
+        await this.database
+          .update(user)
+          .set({ followerCount: sql`${user.followerCount} + 1` })
+          .where(eq(user.id, followingId));
+
+        this.eventEmitter.emit(
+          UserFollowedEvent.key,
+          new UserFollowedEvent(followerId, followingId),
+        );
+      }
     } catch (e) {
       if (isForeignKeyViolation(e)) {
         throw new NotFoundException('User not found');
@@ -106,14 +123,27 @@ export class UsersService {
       throw new BadRequestException('You cannot unfollow yourself');
     }
 
-    await this.database
+    const result = await this.database
       .delete(follow)
       .where(
         and(
           eq(follow.followerId, followerId),
           eq(follow.followingId, followingId),
         ),
+      )
+      .returning();
+
+    if (result.length > 0) {
+      await this.database
+        .update(user)
+        .set({ followerCount: sql`GREATEST(${user.followerCount} - 1, 0)` })
+        .where(eq(user.id, followingId));
+
+      this.eventEmitter.emit(
+        UserUnfollowedEvent.key,
+        new UserUnfollowedEvent(followerId, followingId),
       );
+    }
 
     return { success: true };
   }

@@ -15,6 +15,7 @@ export function useLikePost(postId: number) {
   // We use the raw queryClient.setQueriesData() to optimistically update ALL
   // findAll variants (feed, profile grid, etc.) in a single pass via prefix matching.
   const findAllQueryKey = getQueryKey(trpc.posts.findAll);
+  const feedQueryKey = getQueryKey(trpc.feed.getPostFeed);
 
   const toggleLike = (post: Post) => ({
     ...post,
@@ -29,11 +30,15 @@ export function useLikePost(postId: number) {
       await Promise.all([
         utils.posts.findById.cancel({ postId }),
         utils.posts.findAll.cancel(),
+        utils.feed.getPostFeed.cancel(),
       ]);
 
       const previousPost = utils.posts.findById.getData({ postId });
       const previousAllQueries = queryClient.getQueriesData<PaginatedPosts>({
         queryKey: findAllQueryKey,
+      });
+      const previousFeedQueries = queryClient.getQueriesData<PaginatedPosts>({
+        queryKey: feedQueryKey,
       });
 
       // Optimistic update on findById (modal)
@@ -44,18 +49,25 @@ export function useLikePost(postId: number) {
 
       // Optimistic update on ALL findAll variants (feed, profile grid, etc.)
       // findAll returns paginated data: { items: Post[], nextCursor, hasMore }
+      const updatePaginated = (old: PaginatedPosts | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          items: old.items.map((p) => (p.id === postId ? toggleLike(p) : p)),
+        };
+      };
+
       queryClient.setQueriesData<PaginatedPosts>(
         { queryKey: findAllQueryKey },
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            items: old.items.map((p) => (p.id === postId ? toggleLike(p) : p)),
-          };
-        }
+        updatePaginated,
       );
 
-      return { previousPost, previousAllQueries };
+      queryClient.setQueriesData<PaginatedPosts>(
+        { queryKey: feedQueryKey },
+        updatePaginated,
+      );
+
+      return { previousPost, previousAllQueries, previousFeedQueries };
     },
     onError: (_err, _vars, context) => {
       if (context?.previousPost) {
@@ -65,11 +77,15 @@ export function useLikePost(postId: number) {
       context?.previousAllQueries?.forEach(([queryKey, data]) => {
         if (data) queryClient.setQueryData(queryKey, data);
       });
+      context?.previousFeedQueries?.forEach(([queryKey, data]) => {
+        if (data) queryClient.setQueryData(queryKey, data);
+      });
     },
     onSettled: () => {
       setPending(false);
       utils.posts.findById.invalidate({ postId });
       utils.posts.findAll.invalidate();
+      utils.feed.getPostFeed.invalidate();
     },
   });
 

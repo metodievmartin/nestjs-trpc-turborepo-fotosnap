@@ -8,7 +8,7 @@ import { SuggestedUsers } from '@/components/users/suggested-users';
 const SUGGESTION_AFTER_POST = 2;
 
 export default function Feed() {
-  const { data: postsData, isLoading } = trpc.posts.findAll.useQuery({});
+  const { data: postsData, isLoading } = trpc.feed.getPostFeed.useQuery({});
   const posts = postsData?.items;
 
   if (isLoading) {

@@ -6,6 +6,7 @@ export function useCreateStory() {
   const createStory = trpc.stories.create.useMutation({
     onSuccess: () => {
       utils.stories.getOwnStories.invalidate();
+      utils.feed.getStoryFeed.invalidate();
     },
   });
 

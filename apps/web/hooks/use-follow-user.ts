@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { getQueryKey } from '@trpc/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { UserPreview } from '@repo/contracts/users';
+import { PaginatedUserPreviews, UserPreview } from '@repo/contracts/users';
 
 import { trpc } from '@/lib/trpc/client';
 
@@ -22,32 +22,47 @@ export function useFollowUser(
   const followingKey = getQueryKey(trpc.users.getFollowing);
   const suggestedKey = getQueryKey(trpc.users.getSuggestedUsers);
 
-  const toggleInList = (targetUserId: string) => (old: UserPreview[]) =>
-    old.map((u) =>
-      u.id === targetUserId ? { ...u, isFollowing: !u.isFollowing } : u
-    );
+  const togglePreview = (targetUserId: string, u: UserPreview) =>
+    u.id === targetUserId ? { ...u, isFollowing: !u.isFollowing } : u;
 
   const invalidate = () => {
     utils.users.getUserByUsername.invalidate({ username: profileUsername });
     utils.users.getFollowers.invalidate();
     utils.users.getFollowing.invalidate();
     utils.users.getSuggestedUsers.invalidate();
+    utils.feed.getPostFeed.invalidate();
+    utils.feed.getStoryFeed.invalidate();
   };
 
   const optimisticUpdate = (targetUserId: string) => {
     setPendingUserId(targetUserId);
-    const toggle = toggleInList(targetUserId);
-    queryClient.setQueriesData<UserPreview[]>(
+
+    // getFollowers / getFollowing return paginated data ({ items, nextCursor, hasMore })
+    queryClient.setQueriesData<PaginatedUserPreviews>(
       { queryKey: followersKey },
-      (old) => (old ? toggle(old) : old)
+      (old) =>
+        old
+          ? { ...old, items: old.items.map((u) => togglePreview(targetUserId, u)) }
+          : old,
     );
-    queryClient.setQueriesData<UserPreview[]>(
+    queryClient.setQueriesData<PaginatedUserPreviews>(
       { queryKey: followingKey },
-      (old) => (old ? toggle(old) : old)
+      (old) =>
+        old
+          ? { ...old, items: old.items.map((u) => togglePreview(targetUserId, u)) }
+          : old,
     );
+
+    // getSuggestedUsers returns a flat UserPreview[]
     queryClient.setQueriesData<UserPreview[]>(
       { queryKey: suggestedKey },
-      (old) => (old ? toggle(old) : old)
+      (old) =>
+        old ? old.map((u) => togglePreview(targetUserId, u)) : old,
+    );
+
+    // Optimistically toggle isFollowing on the profile being viewed
+    utils.users.getUserByUsername.setData({ username: profileUsername }, (old) =>
+      old ? { ...old, isFollowing: !old.isFollowing } : old,
     );
   };
 

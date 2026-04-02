@@ -6,6 +6,7 @@ import * as authSchema from '../auth/schema';
 import * as postsSchema from '../posts/schemas/schema';
 import * as commentSchema from '../comments/schemas/schema';
 import * as storiesSchema from '../stories/schemas/schema';
+import * as feedSchema from '../feed/schemas/schema';
 
 // Symbol used as the DI token — avoids magic strings when injecting the DB
 // connection elsewhere (use @Inject(DATABASE_CONNECTION) in your providers).
@@ -16,6 +17,7 @@ export const schema = {
   ...postsSchema,
   ...commentSchema,
   ...storiesSchema,
+  ...feedSchema,
 };
 
 @Module({
