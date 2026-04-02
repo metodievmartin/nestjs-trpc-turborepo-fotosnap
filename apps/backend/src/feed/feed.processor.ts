@@ -58,6 +58,14 @@ export class FeedProcessor extends WorkerHost {
     userId: string;
     createdAt: string;
   }) {
+    // Always insert a self-item so the author sees their own post in the feed
+    await this.database.insert(feedPostItem).values({
+      userId: data.userId,
+      postId: data.postId,
+      sourceUserId: data.userId,
+      createdAt: new Date(data.createdAt),
+    });
+
     const sourceUser = await this.database.query.user.findFirst({
       where: eq(user.id, data.userId),
       columns: { followerCount: true },
@@ -65,7 +73,7 @@ export class FeedProcessor extends WorkerHost {
 
     if (!sourceUser || sourceUser.followerCount >= CELEBRITY_THRESHOLD) {
       this.logger.log(
-        `Skipping fan-out for post ${data.postId} (celebrity user)`,
+        `Skipping follower fan-out for post ${data.postId} (celebrity user)`,
       );
       return;
     }
@@ -108,7 +116,7 @@ export class FeedProcessor extends WorkerHost {
     }
 
     this.logger.log(
-      `Fan-out post ${data.postId} to ${totalInserted} followers`,
+      `Fan-out post ${data.postId} to ${totalInserted} followers + self`,
     );
   }
 
@@ -118,6 +126,15 @@ export class FeedProcessor extends WorkerHost {
     createdAt: string;
     expiresAt: string;
   }) {
+    // Always insert a self-item so the author sees their own story in the feed
+    await this.database.insert(feedStoryItem).values({
+      userId: data.userId,
+      storyId: data.storyId,
+      sourceUserId: data.userId,
+      createdAt: new Date(data.createdAt),
+      expiresAt: new Date(data.expiresAt),
+    });
+
     const sourceUser = await this.database.query.user.findFirst({
       where: eq(user.id, data.userId),
       columns: { followerCount: true },
@@ -125,7 +142,7 @@ export class FeedProcessor extends WorkerHost {
 
     if (!sourceUser || sourceUser.followerCount >= CELEBRITY_THRESHOLD) {
       this.logger.log(
-        `Skipping fan-out for story ${data.storyId} (celebrity user)`,
+        `Skipping follower fan-out for story ${data.storyId} (celebrity user)`,
       );
       return;
     }
@@ -169,7 +186,7 @@ export class FeedProcessor extends WorkerHost {
     }
 
     this.logger.log(
-      `Fan-out story ${data.storyId} to ${totalInserted} followers`,
+      `Fan-out story ${data.storyId} to ${totalInserted} followers + self`,
     );
   }
 
