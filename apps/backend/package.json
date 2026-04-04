@@ -21,7 +21,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "ts-node scripts/seed/seed.ts",
-    "db:seed:stories": "ts-node scripts/seed/seed-stories.ts"
+    "db:seed:stories": "ts-node scripts/seed/seed-stories.ts",
+    "db:unseed": "ts-node scripts/seed/unseed.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
