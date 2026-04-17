@@ -9,14 +9,11 @@ import {
 
 import {
   nullableStoryGroupSchema,
-  paginatedStoryGroupsSchema,
-  getFeedStoriesSchema,
   storySchema,
   createStorySchema,
   getUserStoriesSchema,
   type CreateStoryInput,
   type GetUserStoriesInput,
-  type GetFeedStoriesInput,
 } from '@repo/contracts/stories';
 
 import { StoriesService } from './stories.service';
@@ -42,21 +39,6 @@ export class StoriesRouter {
     @Ctx() context: TrpcSessionContext,
   ) {
     return this.storiesService.getUserStories(input.userId);
-  }
-
-  @Query({
-    input: getFeedStoriesSchema,
-    output: paginatedStoryGroupsSchema,
-  })
-  async getFeedStories(
-    @Ctx() context: TrpcSessionContext,
-    @Input() input: GetFeedStoriesInput,
-  ) {
-    return this.storiesService.getFeedStories(
-      context.user.id,
-      input.cursor,
-      input.limit,
-    );
   }
 
   @Mutation({ input: createStorySchema, output: storySchema })

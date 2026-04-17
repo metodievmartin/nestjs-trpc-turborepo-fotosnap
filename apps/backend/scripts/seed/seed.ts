@@ -1,6 +1,6 @@
 /**
- * Database seed script — creates 15 demo users with profiles, avatars,
- * partial follow relationships, and stories.
+ * Database seed script — creates demo users with profiles, avatars,
+ * follow relationships, posts, and stories.
  *
  * Usage:
  *   npm run db:seed          (from apps/backend or repo root)
@@ -14,149 +14,27 @@
  * All seed users share the password: password123
  */
 
-import { Pool } from 'pg';
-import * as fs from 'fs';
-import * as path from 'path';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
-import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { SEED_USERS, FOLLOW_PAIRS } from './data/users';
+import { SEED_POSTS } from './data/posts';
+import { SEED_STORIES } from './data/stories';
+import { SEED_LIKES, SEED_COMMENTS } from './data/interactions';
 
-import * as authSchema from '../../src/auth/schema';
-import * as postsSchema from '../../src/posts/schemas/schema';
-import * as commentSchema from '../../src/comments/schemas/schema';
-import * as storiesSchema from '../../src/stories/schemas/schema';
-import { SEED_USERS, DATABASE_URL, UPLOADS_DIR } from './seed-data';
-import { SEED_STORIES, copyStoryImages, seedStories } from './story-data';
-
-// ---------------------------------------------------------------------------
-// Config
-// ---------------------------------------------------------------------------
-
-const SEED_PASSWORD = 'password123';
-
-const AVATARS_DIR = path.resolve(__dirname, 'avatars');
-
-// ---------------------------------------------------------------------------
-// Follow graph — sparse on purpose so suggested users works.
-// Each entry: [followerIndex, followingIndex] (indexes into SEED_USERS)
-//
-// Cluster 1 (fashion/music/lifestyle): valentina, daniel, marco — tight-knit
-// Cluster 2 (nature/outdoors): rowan, hannah, ryan — some overlap
-// Cluster 3 (urban/creative): jay, nina, elena — loose ties
-// Isolated-ish: claire, toby, sam, priya, alex.lifts, mina — few connections
-// ---------------------------------------------------------------------------
-
-const FOLLOW_PAIRS: [number, number][] = [
-  // Cluster 1: valentina(0), daniel(1), marco(3)
-  [0, 1],
-  [1, 0],
-  [0, 3],
-  [3, 0],
-  [1, 3],
-  // Cluster 2: rowan(2), hannah(4), ryan(10)
-  [2, 4],
-  [4, 2],
-  [10, 2],
-  [10, 4],
-  // Cluster 3: jay(5), nina(7), elena(8)
-  [5, 7],
-  [7, 5],
-  [8, 5],
-  [8, 7],
-  // Cross-cluster bridges
-  [0, 8], // valentina follows elena (fashion meets golden-hour portraits)
-  [1, 5], // daniel follows jay (music meets urban creative)
-  [4, 8], // hannah follows elena (plants meets golden hour)
-  // claire(6) and toby(9) — tech duo, few connections
-  [6, 9],
-  [9, 6],
-  // sam(11) follows a handful but nobody follows back (lurker)
-  [11, 0],
-  [11, 3],
-  [11, 8],
-  // priya(12) — one mutual with rowan
-  [12, 2],
-  [2, 12],
-  // alex.lifts(13) and mina(14) — completely isolated, zero follows
-];
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function copyAvatars(): Map<string, string> {
-  const avatarMap = new Map<string, string>();
-
-  if (!fs.existsSync(AVATARS_DIR)) {
-    console.log('  No avatars directory found, skipping avatar copy.');
-    return avatarMap;
-  }
-
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-
-  for (const seedUser of SEED_USERS) {
-    if (!seedUser.avatar) continue;
-
-    const src = path.join(AVATARS_DIR, seedUser.avatar);
-    if (!fs.existsSync(src)) {
-      console.log(
-        `  Avatar not found for ${seedUser.username}: ${seedUser.avatar}`,
-      );
-      continue;
-    }
-    const dest = path.join(UPLOADS_DIR, seedUser.avatar);
-    fs.copyFileSync(src, dest);
-    avatarMap.set(seedUser.email, seedUser.avatar);
-  }
-
-  return avatarMap;
-}
-
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
+import { createDb, SEED_PASSWORD } from './lib/db';
+import { copyAvatars, copyPostImages, copyStoryImages } from './lib/images';
+import { seedUsers, seedFollows } from './lib/seed-users';
+import { seedPosts } from './lib/seed-posts';
+import { seedStories } from './lib/seed-stories';
+import { seedInteractions } from './lib/seed-interactions';
+import {
+  updateFollowerCounts,
+  backfillPostFeed,
+  backfillStoryFeed,
+} from './lib/backfill';
 
 async function seed() {
   console.log('Seeding database...\n');
 
-  // --- DB connection ---
-  const pool = new Pool({ connectionString: DATABASE_URL });
-  const db = drizzle(pool, {
-    schema: {
-      ...authSchema,
-      ...postsSchema,
-      ...commentSchema,
-      ...storiesSchema,
-    },
-  });
-
-  // --- Better Auth instance (standalone, same config as app.module.ts) ---
-  const auth = betterAuth({
-    database: drizzleAdapter(db, { provider: 'pg' }),
-    baseURL: 'http://localhost:4000',
-    emailAndPassword: { enabled: true },
-    user: {
-      fields: {
-        name: 'username',
-      },
-      additionalFields: {
-        displayName: {
-          type: 'string',
-          required: false,
-          fieldName: 'display_name',
-        },
-        bio: {
-          type: 'string',
-          required: false,
-        },
-        website: {
-          type: 'string',
-          required: false,
-        },
-      },
-    },
-  });
+  const { pool, db } = createDb();
 
   // --- Copy images ---
   console.log('Copying avatars...');
@@ -165,81 +43,39 @@ async function seed() {
 
   console.log('Copying story images...');
   copyStoryImages();
-  console.log(`  ${SEED_STORIES.length} story images copied.\n`);
+  console.log(`  ${SEED_STORIES.length} story images copied.`);
+
+  console.log('Copying post images...');
+  copyPostImages();
+  console.log(`  ${SEED_POSTS.length} post images copied.\n`);
 
   // --- Create users ---
-  console.log('Creating users...');
-  const userIds: string[] = [];
-
-  for (const seedUser of SEED_USERS) {
-    // Check if user already exists
-    const existing = await db
-      .select({ id: authSchema.user.id })
-      .from(authSchema.user)
-      .where(eq(authSchema.user.email, seedUser.email))
-      .limit(1);
-
-    if (existing.length > 0) {
-      console.log(`  Skipped (exists): ${seedUser.username}`);
-      userIds.push(existing[0].id);
-      continue;
-    }
-
-    // Create via Better Auth — this populates user + account tables
-    const result = await auth.api.signUpEmail({
-      body: {
-        name: seedUser.username,
-        email: seedUser.email,
-        password: SEED_PASSWORD,
-        image: avatarMap.get(seedUser.email) ?? undefined,
-      },
-    });
-
-    const userId = result.user.id;
-    userIds.push(userId);
-
-    // Update profile fields that signUpEmail doesn't support
-    await db
-      .update(authSchema.user)
-      .set({
-        displayName: seedUser.displayName,
-        bio: seedUser.bio,
-        website: seedUser.website ?? null,
-      })
-      .where(eq(authSchema.user.id, userId));
-
-    console.log(`  Created: ${seedUser.username} (${userId})`);
-  }
+  const userIds = await seedUsers(db, avatarMap);
 
   // --- Create follow relationships ---
-  console.log('\nCreating follow relationships...');
-  let followCount = 0;
+  await seedFollows(db, userIds);
 
-  for (const [followerIdx, followingIdx] of FOLLOW_PAIRS) {
-    const followerId = userIds[followerIdx];
-    const followingId = userIds[followingIdx];
+  // --- Create posts ---
+  await seedPosts(db, userIds);
 
-    try {
-      await db
-        .insert(authSchema.follow)
-        .values({ followerId, followingId })
-        .onConflictDoNothing();
-      followCount++;
-    } catch {
-      // already exists — composite PK conflict
-    }
-  }
+  // --- Create likes & comments ---
+  await seedInteractions(db, userIds);
 
-  console.log(`  ${followCount} follow relationships created.`);
-
-  // --- Create stories (deletes existing seed-user stories first) ---
-  console.log('');
+  // --- Create stories ---
   await seedStories(db, userIds);
+
+  // --- Backfill feed tables ---
+  await updateFollowerCounts(db);
+  await backfillPostFeed(db);
+  await backfillStoryFeed(db);
 
   // --- Done ---
   console.log('\nSeed complete!');
   console.log(`  Users: ${SEED_USERS.length}`);
   console.log(`  Follow pairs: ${FOLLOW_PAIRS.length}`);
+  console.log(`  Posts: ${SEED_POSTS.length}`);
+  console.log(`  Likes: ${SEED_LIKES.length}`);
+  console.log(`  Comments: ${SEED_COMMENTS.length}`);
   console.log(`  Stories: ${SEED_STORIES.length}`);
   console.log(`  Password for all: ${SEED_PASSWORD}\n`);
 

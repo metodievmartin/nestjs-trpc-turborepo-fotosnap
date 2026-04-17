@@ -1,5 +1,6 @@
 /**
- * Story seed — refreshes stories for seed users only.
+ * Story seed — refreshes stories for seed users only, then backfills
+ * story feed items.
  *
  * Usage:
  *   npm run db:seed:stories   (from apps/backend or repo root)
@@ -9,29 +10,20 @@
  * users (e.g. your test account) are left untouched.
  */
 
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { inArray } from 'drizzle-orm';
 
-import * as authSchema from '../../src/auth/schema';
-import * as postsSchema from '../../src/posts/schemas/schema';
-import * as commentSchema from '../../src/comments/schemas/schema';
-import * as storiesSchema from '../../src/stories/schemas/schema';
-import { DATABASE_URL, SEED_USERS } from './seed-data';
-import { SEED_STORIES, copyStoryImages, seedStories } from './story-data';
+import { SEED_USERS } from './data/users';
+import { SEED_STORIES } from './data/stories';
+
+import { createDb, authSchema } from './lib/db';
+import { copyStoryImages } from './lib/images';
+import { seedStories } from './lib/seed-stories';
+import { backfillStoryFeed } from './lib/backfill';
 
 async function main() {
   console.log('Seeding stories...\n');
 
-  const pool = new Pool({ connectionString: DATABASE_URL });
-  const db = drizzle(pool, {
-    schema: {
-      ...authSchema,
-      ...postsSchema,
-      ...commentSchema,
-      ...storiesSchema,
-    },
-  });
+  const { pool, db } = createDb();
 
   // --- Copy story images ---
   console.log('Copying story images...');
@@ -57,7 +49,10 @@ async function main() {
   // --- Delete existing seed-user stories, then insert fresh ones ---
   const storyCount = await seedStories(db, userIds);
 
-  console.log('\nStory seed complete!');
+  // --- Backfill story feed items so stories appear in feeds ---
+  await backfillStoryFeed(db);
+
+  console.log('Story seed complete!');
   console.log(`  Stories: ${storyCount}\n`);
 
   await pool.end();

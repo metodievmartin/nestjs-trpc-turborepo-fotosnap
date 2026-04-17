@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreatePostInput, PaginatedPosts, Post } from '@repo/contracts/posts';
 import { and, desc, eq, InferSelectModel, lt, or, SQL } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -8,6 +9,7 @@ import { comment } from '../comments/schemas/schema';
 import { schema } from '../database/database.module';
 import { DATABASE_CONNECTION } from '../database/database-connection';
 import { user } from '../auth/schema';
+import { PostCreatedEvent } from '../feed/events/post-created.event';
 
 type PostWithRelations = InferSelectModel<typeof post> & {
   user: InferSelectModel<typeof user>;
@@ -20,6 +22,7 @@ export class PostsService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly database: NodePgDatabase<typeof schema>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(
@@ -107,15 +110,21 @@ export class PostsService {
   }
 
   async create(createPostInput: CreatePostInput, userId: string) {
-    await this.database
+    const createdAt = new Date();
+    const [{ id }] = await this.database
       .insert(post)
       .values({
         userId,
         caption: createPostInput.caption,
         image: createPostInput.image,
-        createdAt: new Date(),
+        createdAt,
       })
-      .returning();
+      .returning({ id: post.id });
+
+    this.eventEmitter.emit(
+      PostCreatedEvent.key,
+      new PostCreatedEvent(id, userId, createdAt),
+    );
   }
 
   async likePost(postId: number, userId: string) {

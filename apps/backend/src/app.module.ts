@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
 import { APP_GUARD } from '@nestjs/core';
 import { TRPCModule } from 'nestjs-trpc';
+import { BullModule } from '@nestjs/bullmq';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { AuthGuard, AuthModule } from '@thallesp/nestjs-better-auth';
@@ -16,11 +18,22 @@ import { AuthTrpcMiddleware } from './auth/auth-trpc.middleware';
 import { HttpExceptionMapperMiddleware } from './trpc/http-exception-mapper.middleware';
 import { DATABASE_CONNECTION } from './database/database-connection';
 import { CommentsModule } from './comments/comments.module';
+import { FeedModule } from './feed/feed.module';
 import { StoriesModule } from './stories/stories.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    EventEmitterModule.forRoot(),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          url: configService.getOrThrow<string>('REDIS_URL'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     DatabaseModule,
     TRPCModule.forRoot({
       basePath: '/api/trpc',
@@ -78,6 +91,7 @@ import { StoriesModule } from './stories/stories.module';
     UploadModule,
     CommentsModule,
     StoriesModule,
+    FeedModule,
   ],
   controllers: [],
   providers: [

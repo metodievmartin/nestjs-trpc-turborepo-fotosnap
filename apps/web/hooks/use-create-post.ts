@@ -5,7 +5,7 @@ export function useCreatePost() {
   const utils = trpc.useUtils();
   const createPost = trpc.posts.create.useMutation({
     onSuccess: () => {
-      // Invalidate the findAll query cache to refetch posts
+      utils.feed.getPostFeed.invalidate();
       utils.posts.findAll.invalidate();
     },
   });

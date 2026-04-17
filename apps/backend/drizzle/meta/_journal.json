@@ -71,6 +71,13 @@
       "when": 1776169731378,
       "tag": "0009_rename-name-to-username",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1776243650654,
+      "tag": "0010_add-feed-tables-and-follower-count",
+      "breakpoints": true
     }
   ]
 }

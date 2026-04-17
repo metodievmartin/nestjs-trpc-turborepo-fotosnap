@@ -15,8 +15,9 @@ const t = initTRPC.create();
 const publicProcedure = t.procedure;
 import { userIdSchema, getFollowersSchema, paginatedUserPreviewsSchema, getFollowingSchema, userPreviewSchema, updateProfileSchema, userProfileSchema, usernameParamSchema } from "@repo/contracts/users";
 import { createCommentSchema, getCommentsSchema, paginatedCommentsSchema, deleteCommentSchema } from "@repo/contracts/comments";
+import { getPostFeedSchema, postFeedResponseSchema, getStoryFeedSchema, storyFeedResponseSchema } from "@repo/contracts/feed";
 import { findAllPostsSchema, paginatedPostsSchema, findByIdPostSchema, postSchema, createPostSchema, likePostSchema } from "@repo/contracts/posts";
-import { nullableStoryGroupSchema, getUserStoriesSchema, getFeedStoriesSchema, paginatedStoryGroupsSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
+import { nullableStoryGroupSchema, getUserStoriesSchema, createStorySchema, storySchema } from "@repo/contracts/stories";
 
 const appRouter = t.router({
   users: t.router({
@@ -62,6 +63,16 @@ const appRouter = t.router({
       .input(deleteCommentSchema)
       .mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
     }),
+  feed: t.router({
+    getPostFeed: publicProcedure
+      .input(getPostFeedSchema)
+      .output(postFeedResponseSchema)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getStoryFeed: publicProcedure
+      .input(getStoryFeedSchema)
+      .output(storyFeedResponseSchema)
+      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    }),
   posts: t.router({
     findAll: publicProcedure
       .input(findAllPostsSchema)
@@ -85,10 +96,6 @@ const appRouter = t.router({
     getUserStories: publicProcedure
       .input(getUserStoriesSchema)
       .output(nullableStoryGroupSchema)
-      .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
-    getFeedStories: publicProcedure
-      .input(getFeedStoriesSchema)
-      .output(paginatedStoryGroupsSchema)
       .query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
     create: publicProcedure
       .input(createStorySchema)
