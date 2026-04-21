@@ -1,5 +1,5 @@
 import { Inject, Logger } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, WorkerOptions } from 'bullmq';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, eq, lt, sql } from 'drizzle-orm';
@@ -14,6 +14,7 @@ import {
   CLEANUP_EXPIRED_STORIES_JOB,
   CLEANUP_ORPHANED_POSTS_JOB,
 } from '../feed.constants';
+import { logWorkerEvent } from './shared';
 
 function getCleanupWorkerOptions(): Pick<WorkerOptions, 'concurrency'> {
   const concurrency = Number(process.env.FEED_CLEANUP_CONCURRENCY ?? 1);
@@ -94,5 +95,27 @@ export class FeedCleanupProcessor extends WorkerHost {
     `);
 
     this.logger.log('Cleaned up orphaned post feed items');
+  }
+
+  @OnWorkerEvent('active')
+  onActive(job: Job) {
+    logWorkerEvent(this.logger, 'active', FEED_CLEANUP_QUEUE, job);
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    logWorkerEvent(this.logger, 'completed', FEED_CLEANUP_QUEUE, job);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job | undefined, err: Error) {
+    logWorkerEvent(this.logger, 'failed', FEED_CLEANUP_QUEUE, job, {
+      error: err.message,
+    });
+  }
+
+  @OnWorkerEvent('stalled')
+  onStalled(jobId: string) {
+    logWorkerEvent(this.logger, 'stalled', FEED_CLEANUP_QUEUE, jobId);
   }
 }

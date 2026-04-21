@@ -1,5 +1,5 @@
 import { Inject, Logger } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, WorkerOptions } from 'bullmq';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, eq, gt } from 'drizzle-orm';
@@ -15,7 +15,7 @@ import {
 } from '../feed.constants';
 import { post } from '../../posts/schemas/schema';
 import { story } from '../../stories/schemas/schema';
-import { BATCH_SIZE } from './shared';
+import { BATCH_SIZE, logWorkerEvent } from './shared';
 
 function getBackfillWorkerOptions(): Pick<WorkerOptions, 'concurrency'> {
   const concurrency = Number(process.env.FEED_BACKFILL_CONCURRENCY ?? 2);
@@ -119,5 +119,27 @@ export class FeedBackfillProcessor extends WorkerHost {
     this.logger.log(
       `Backfilled follow ${data.followerId} → ${data.followingId}: ${posts.length} posts, ${activeStories.length} stories`,
     );
+  }
+
+  @OnWorkerEvent('active')
+  onActive(job: Job) {
+    logWorkerEvent(this.logger, 'active', FEED_BACKFILL_QUEUE, job);
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    logWorkerEvent(this.logger, 'completed', FEED_BACKFILL_QUEUE, job);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job | undefined, err: Error) {
+    logWorkerEvent(this.logger, 'failed', FEED_BACKFILL_QUEUE, job, {
+      error: err.message,
+    });
+  }
+
+  @OnWorkerEvent('stalled')
+  onStalled(jobId: string) {
+    logWorkerEvent(this.logger, 'stalled', FEED_BACKFILL_QUEUE, jobId);
   }
 }

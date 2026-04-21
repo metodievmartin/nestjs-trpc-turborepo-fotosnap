@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
+import { admin } from 'better-auth/plugins';
 import { APP_GUARD } from '@nestjs/core';
 import { TRPCModule } from 'nestjs-trpc';
 import { BullModule } from '@nestjs/bullmq';
@@ -20,13 +21,15 @@ import { DATABASE_CONNECTION } from './database/database-connection';
 import { CommentsModule } from './comments/comments.module';
 import { FeedModule } from './feed/feed.module';
 import { StoriesModule } from './stories/stories.module';
+import { AdminModule } from './admin/admin.module';
+import { ADMIN_ROLES, DEFAULT_USER_ROLE } from './admin/admin.constants';
+import { parseAdminUserIds } from './admin/admin-auth';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
     BullModule.forRootAsync({
-      imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         connection: {
           url: configService.getOrThrow<string>('REDIS_URL'),
@@ -41,7 +44,7 @@ import { StoriesModule } from './stories/stories.module';
       globalMiddlewares: [HttpExceptionMapperMiddleware],
     }),
     AuthModule.forRootAsync({
-      imports: [DatabaseModule, ConfigModule],
+      imports: [DatabaseModule],
       useFactory: (database: NodePgDatabase, configService: ConfigService) => ({
         auth: betterAuth({
           // drizzleAdapter bridges better-auth's internal DB calls to the
@@ -81,6 +84,16 @@ import { StoriesModule } from './stories/stories.module';
               },
             },
           },
+
+          plugins: [
+            admin({
+              defaultRole: DEFAULT_USER_ROLE,
+              adminRoles: [...ADMIN_ROLES],
+              // Zero-DB-write bootstrap: set ADMIN_USER_IDS=id1,id2 in .env
+              // to grant admin without touching the `role` column.
+              adminUserIds: [...parseAdminUserIds(configService)],
+            }),
+          ],
         }),
       }),
       // Tokens injected into useFactory in the same order as the factory params.
@@ -92,6 +105,7 @@ import { StoriesModule } from './stories/stories.module';
     CommentsModule,
     StoriesModule,
     FeedModule.forRoot(),
+    AdminModule,
   ],
   controllers: [],
   providers: [

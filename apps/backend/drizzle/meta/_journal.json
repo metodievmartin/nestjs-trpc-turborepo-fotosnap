@@ -78,6 +78,13 @@
       "when": 1776243650654,
       "tag": "0010_add-feed-tables-and-follower-count",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1776785372922,
+      "tag": "0011_add_admin_fields",
+      "breakpoints": true
     }
   ]
 }

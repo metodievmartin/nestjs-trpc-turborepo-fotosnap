@@ -1,5 +1,5 @@
 import { Inject, Logger } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, WorkerOptions } from 'bullmq';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
@@ -14,7 +14,7 @@ import {
   FAN_OUT_POST_JOB,
   FAN_OUT_STORY_JOB,
 } from '../feed.constants';
-import { iterateFollowerIdsPaged } from './shared';
+import { iterateFollowerIdsPaged, logWorkerEvent } from './shared';
 
 // Decorators run before Nest DI, so worker options must come from process.env,
 // not ConfigService. Read once at module load.
@@ -151,5 +151,30 @@ export class FeedFanoutProcessor extends WorkerHost {
     this.logger.log(
       `Fan-out story ${data.storyId} to ${totalInserted} followers + self`,
     );
+  }
+
+  // Lifecycle logging — BullMQ detects stalls via its default
+  // `stalledInterval: 30000` / `maxStalledCount: 1` (one stall re-queues).
+  // We don't customise those; the listener just surfaces them.
+  @OnWorkerEvent('active')
+  onActive(job: Job) {
+    logWorkerEvent(this.logger, 'active', FEED_FANOUT_QUEUE, job);
+  }
+
+  @OnWorkerEvent('completed')
+  onCompleted(job: Job) {
+    logWorkerEvent(this.logger, 'completed', FEED_FANOUT_QUEUE, job);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job | undefined, err: Error) {
+    logWorkerEvent(this.logger, 'failed', FEED_FANOUT_QUEUE, job, {
+      error: err.message,
+    });
+  }
+
+  @OnWorkerEvent('stalled')
+  onStalled(jobId: string) {
+    logWorkerEvent(this.logger, 'stalled', FEED_FANOUT_QUEUE, jobId);
   }
 }
