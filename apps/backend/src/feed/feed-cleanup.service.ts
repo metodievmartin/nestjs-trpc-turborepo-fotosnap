@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
 import {
-  FEED_QUEUE,
+  FEED_CLEANUP_QUEUE,
   CLEANUP_EXPIRED_STORIES_JOB,
   CLEANUP_ORPHANED_POSTS_JOB,
 } from './feed.constants';
@@ -13,7 +13,7 @@ export class FeedCleanupService implements OnModuleInit {
   private readonly logger = new Logger(FeedCleanupService.name);
 
   constructor(
-    @InjectQueue(FEED_QUEUE) private readonly feedQueue: Queue,
+    @InjectQueue(FEED_CLEANUP_QUEUE) private readonly feedQueue: Queue,
   ) {}
 
   async onModuleInit() {

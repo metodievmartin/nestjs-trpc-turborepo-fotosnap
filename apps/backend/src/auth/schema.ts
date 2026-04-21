@@ -25,6 +25,11 @@
 // organisation), you can either rerun `npx @better-auth/cli generate` or
 // manually add the Drizzle table definitions here. After any schema change,
 // run `npm run db:generate` and `npm run db:migrate` to update the database.
+//
+// Hand-added fields (NOT via CLI — the CLI has no visibility into our custom
+// `follow` table + relations and could stomp them on regeneration):
+//   - user.role, user.banned, user.banReason, user.banExpires  — admin plugin
+//   - session.impersonatedBy                                   — admin plugin
 // =============================================================================
 
 import { relations } from 'drizzle-orm';
@@ -39,6 +44,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { post } from '../posts/schemas/schema';
+import { DEFAULT_USER_ROLE } from '../admin/admin.constants';
 
 export const user = pgTable(
   'user',
@@ -52,6 +58,14 @@ export const user = pgTable(
     bio: text('bio'),
     website: text('website'),
     followerCount: integer('follower_count').default(0).notNull(),
+    // `role` and `banned` stay nullable to match Better Auth's admin plugin
+    // expectations — the plugin reads `role ?? defaultRole` internally and
+    // the CLI-generated schema for these fields is nullable. Tightening to
+    // `.notNull()` could diverge from what the plugin writes.
+    role: text('role').default(DEFAULT_USER_ROLE),
+    banned: boolean('banned'),
+    banReason: text('ban_reason'),
+    banExpires: timestamp('ban_expires'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
@@ -76,6 +90,7 @@ export const session = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    impersonatedBy: text('impersonated_by'),
   },
   (table) => [index('session_userId_idx').on(table.userId)],
 );

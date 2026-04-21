@@ -1,8 +1,10 @@
 import path from 'node:path';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from './app.module';
+import { getEnabledWorkerRoles } from './feed/worker-roles';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -17,6 +19,14 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  await app.listen(process.env.PORT ?? 4000);
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port);
+
+  const logger = new Logger('Bootstrap');
+  const roles = Array.from(getEnabledWorkerRoles());
+  logger.log(`API listening on port ${port}`);
+  logger.log(
+    `Feed worker roles in this process: ${roles.length > 0 ? roles.join(',') : '(none)'}`,
+  );
 }
 bootstrap();

@@ -369,9 +369,30 @@ chronological to engagement-based:
 
 ### Scaling the Fan-out
 
-Current: single BullMQ worker in the NestJS process. To scale:
+Background work is split across three BullMQ queues, each owned by its own processor class and scaled independently:
 
-1. **More concurrency**: Configure `@Processor('feed', { concurrency: 5 })`.
-2. **Separate worker process**: Extract the processor into a standalone NestJS app that only runs the BullMQ worker,
-   deployed independently from the API server.
-3. **Message broker**: Replace BullMQ with RabbitMQ or Kafka for higher throughput and multi-consumer patterns.
+| Queue           | Processor               | Jobs                                                                    | Default concurrency |
+|-----------------|-------------------------|-------------------------------------------------------------------------|---------------------|
+| `feed-fanout`   | `FeedFanoutProcessor`   | `fan-out-post`, `fan-out-story`                                         | 5                   |
+| `feed-backfill` | `FeedBackfillProcessor` | `backfill-follow`                                                       | 2                   |
+| `feed-cleanup`  | `FeedCleanupProcessor`  | `cleanup-unfollow`, `cleanup-expired-stories`, `cleanup-orphaned-posts` | 1                   |
+
+Each concurrency value is env-tunable (`FEED_FANOUT_CONCURRENCY`, `FEED_BACKFILL_CONCURRENCY`,
+`FEED_CLEANUP_CONCURRENCY`). The fan-out queue additionally rate-limits writes via `FEED_FANOUT_LIMITER_MAX` (default
+50) per `FEED_FANOUT_LIMITER_DURATION_MS` (default 1000) to prevent Postgres saturation during viral moments.
+
+**Idempotency:** Producers pass deterministic `jobId`s (e.g., `fanout-post_${postId}`). Duplicate enqueues of the same
+event are silently collapsed by BullMQ.
+
+**Retries:** Event-driven lanes (fan-out, backfill) retry 3× with exponential backoff. Cleanup is `attempts: 1` — the
+cron re-fires and retries on transient failures would just double-run DELETEs.
+
+**Runtime topology:** The same backend codebase hosts both the HTTP API and the consumers. The `WORKER_ROLES` env var
+picks which consumers to start:
+
+- Unset or `all`: run all three consumers (single-process dev UX, still the default for `npm run dev`).
+- `none`: API only, no consumers (pair with `npm run dev:worker` in a second terminal).
+- Any comma-separated subset of `fanout,backfill,cleanup`: run only those consumers.
+
+A secondary entry point (`apps/backend/src/main-worker.ts`) uses `NestFactory.createApplicationContext` to run Nest
+headless — no HTTP listener, workers only. See `docs/adr-feed-service.md` §9 for the rationale.
