@@ -55,6 +55,28 @@ Default ranking is reverse chronological. A `RankingStrategy` interface allows s
 
 The existing `posts.findAll()` loses its "all posts globally" behavior and serves only user-specific queries (profile pages). The global timeline is replaced entirely by the feed module. The "browse all posts" concept will eventually become the "Explore" / "For You" feed.
 
+### 9. Split BullMQ Queues by Workload (2026-04-21)
+
+The single `'feed'` queue was split into three workload-specific queues — `feed-fanout`, `feed-backfill`, `feed-cleanup` — each with its own processor class (`FeedFanoutProcessor`, `FeedBackfillProcessor`, `FeedCleanupProcessor`) and independently tunable concurrency/limiter settings.
+
+**Rationale:** BullMQ does not support per-job-name concurrency on a single queue. Under the unified queue, a slow cleanup job could head-of-line-block a user-visible fan-out. Splitting isolates workloads and lets each lane be scaled independently via env vars (`FEED_FANOUT_CONCURRENCY`, `FEED_FANOUT_LIMITER_MAX`, `FEED_BACKFILL_CONCURRENCY`, `FEED_CLEANUP_CONCURRENCY`).
+
+**Rejected alternatives:**
+
+- _Six queues_ (one per job type) — too granular; fan-out for posts and fan-out for stories have identical scaling characteristics and share a limiter.
+- _Two queues_ (event-driven vs cron) — conflates backfill with fan-out, which have very different latency sensitivity.
+- _One queue with more workers_ — doesn't isolate lanes; a cleanup burst still starves fan-out.
+
+**Idempotency:** Producers pass deterministic `jobId`s derived from the entity IDs (`fanout-post_${postId}`, `backfill-follow_${followerId}_${followingId}`, etc. — `_` is used instead of `:` because BullMQ reserves `:` for its Redis key separator and rejects custom job IDs containing it). BullMQ silently drops duplicates at enqueue, eliminating the need for custom dedup locking.
+
+**Retries:** Event-driven lanes (fan-out, backfill) retry 3× with exponential backoff. Cleanup does not retry — its cron re-fires, so retries would just double-run DELETEs on transient failures.
+
+**Runtime model:** A second entry point (`main-worker.ts`) uses `NestFactory.createApplicationContext` to run the workers headless. Processes select their workload via the `WORKER_ROLES` env var (`all`, `none`, or any comma-separated subset of `fanout,backfill,cleanup`). The default `npm run dev` UX is unchanged — one Nest process runs API + all workers. Dedicated scripts exist for API-only (`dev:api`) and worker-only (`dev:worker`, `dev:worker:fanout`, etc.) development.
+
+**Cleanup scheduling stays on the API process.** `FeedCleanupService` (the cron scheduler, not the consumer) runs unconditionally in any process that imports `FeedModule`. Today that's always the API — keeping the schedule tied to the long-lived API process avoids gaps when worker replicas are scaled down or restarted.
+
+**Migration note:** The old `'feed'` queue in Redis has no consumers after this change. On first deploy, drain it manually (`redis-cli DEL bull:feed:*`) or accept it as empty dead data; the new queues are named differently so there's no risk of message loss.
+
 ## Consequences
 
 - **New infrastructure dependency:** Redis (required by BullMQ). Needed anyway for future caching.

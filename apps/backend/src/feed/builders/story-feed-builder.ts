@@ -101,6 +101,8 @@ export class StoryFeedBuilder {
       ? sql`MAX(${feedStoryItem.storyId}) < ${Number(cursor)}`
       : sql`TRUE`;
 
+    // Exclude the viewer's own stories — they're surfaced in the dedicated
+    // "your story" UI affordance, not mixed into the followed-users row.
     const result = await this.database.execute<{
       userId: string;
       max_story_id: number;
@@ -109,6 +111,7 @@ export class StoryFeedBuilder {
              MAX(${feedStoryItem.storyId}) as max_story_id
       FROM ${feedStoryItem}
       WHERE ${feedStoryItem.userId} = ${viewerId}
+        AND ${feedStoryItem.sourceUserId} <> ${viewerId}
         AND ${feedStoryItem.expiresAt} > ${now}
       GROUP BY ${feedStoryItem.sourceUserId}
       HAVING ${cursorCondition}

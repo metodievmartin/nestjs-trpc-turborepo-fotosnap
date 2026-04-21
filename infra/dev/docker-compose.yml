@@ -22,6 +22,23 @@ services:
     volumes:
       - redis_data:/data
 
+  # Feed worker — runs BullMQ consumers as a separate process.
+  # Dev default: host-run via `npm run dev:worker` (see docs/plans/2026-04-21-split-feed-workers.md).
+  # Uncomment to run inside the compose network instead, or copy into production manifests.
+  #
+  # worker:
+  #   build:
+  #     context: ../..
+  #     dockerfile: apps/backend/Dockerfile
+  #   command: node dist/main-worker.js
+  #   environment:
+  #     DATABASE_URL: postgres://postgres:postgres@db:5432/fotosnap
+  #     REDIS_URL: redis://redis:6379
+  #     WORKER_ROLES: all
+  #   depends_on:
+  #     - db
+  #     - redis
+
 volumes:
   db_data:
   redis_data:

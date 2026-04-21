@@ -91,7 +91,7 @@ import { StoriesModule } from './stories/stories.module';
     UploadModule,
     CommentsModule,
     StoriesModule,
-    FeedModule,
+    FeedModule.forRoot(),
   ],
   controllers: [],
   providers: [
