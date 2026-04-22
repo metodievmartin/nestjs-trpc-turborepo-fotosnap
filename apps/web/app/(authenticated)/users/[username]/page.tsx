@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
@@ -9,6 +10,7 @@ import { authClient } from '@/lib/auth/client';
 import { useFollowUser } from '@/hooks/use-follow-user';
 import { useUpdateProfile } from '@/hooks/use-update-profile';
 import { useUpdateAvatar } from '@/hooks/use-update-avatar';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import ProfileHeader from '@/components/users/profile-header';
 import { ProfileTabs } from '@/components/users/profile-tabs';
 import { PostModal } from '@/components/users/post-modal';
@@ -30,12 +32,24 @@ export default function ProfilePage() {
   });
 
   const userId = profile?.id;
+  const isOwnProfile = session?.user.id === profile?.id;
 
-  const { data: postsData } = trpc.posts.findAll.useQuery(
-    { userId: userId ?? '' },
-    { enabled: !!userId }
+  const postsQuery = trpc.posts.findAll.useInfiniteQuery(
+    { userId: userId ?? '', limit: 12 },
+    {
+      enabled: !!userId,
+      getNextPageParam: (last) => last.nextCursor ?? undefined,
+      initialCursor: undefined,
+    }
   );
-  const posts = postsData?.items ?? [];
+  const posts = postsQuery.data?.pages.flatMap((page) => page.items) ?? [];
+
+  const postsSentinelRef = useInfiniteScroll({
+    hasNextPage: postsQuery.hasNextPage,
+    isFetchingNextPage: postsQuery.isFetchingNextPage,
+    fetchNextPage: postsQuery.fetchNextPage,
+    rootMargin: '400px 0px',
+  });
   const { toggleFollow, isPending: isFollowPending } = useFollowUser(username, {
     invalidateOnSuccess: true,
   });
@@ -78,14 +92,25 @@ export default function ProfilePage() {
         onEditProfile={() => setIsEditProfileOpen(true)}
         onChangePhoto={() => setIsAvatarUploadOpen(true)}
         isFollowLoading={isFollowPending}
-        isOwnProfile={session?.user.id === profile.id}
+        isOwnProfile={isOwnProfile}
       />
 
       <ProfileTabs
         userPosts={posts}
         savedPosts={[]}
         username={profile.username}
+        isOwnProfile={isOwnProfile}
         onPostClick={(post) => setSelectedPostId(post.id)}
+        postsFooter={
+          <>
+            <div ref={postsSentinelRef} aria-hidden="true" />
+            {postsQuery.isFetchingNextPage && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+          </>
+        }
       />
 
       {selectedPostId && (
