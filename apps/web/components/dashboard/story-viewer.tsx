@@ -12,6 +12,9 @@ interface StoryViewerProps {
   open: boolean;
   initialGroupIndex: number;
   onOpenChange: (open: boolean) => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => unknown;
 }
 
 export function StoryViewer({
@@ -19,6 +22,9 @@ export function StoryViewer({
   open,
   onOpenChange,
   initialGroupIndex,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
 }: StoryViewerProps) {
   const [currentGroupIndex, setCurrentGroupIndex] = useState(initialGroupIndex);
 
@@ -60,6 +66,9 @@ export function StoryViewer({
           currentGroupIndex={currentGroupIndex}
           onGroupChange={handleGroupChange}
           onClose={handleClose}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
         />
 
         <Button
