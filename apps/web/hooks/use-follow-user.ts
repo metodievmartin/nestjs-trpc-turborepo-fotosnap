@@ -6,6 +6,33 @@ import { PaginatedUserPreviews, UserPreview } from '@repo/contracts/users';
 
 import { trpc } from '@/lib/trpc/client';
 
+type InfinitePaginatedUserPreviews = {
+  pages: PaginatedUserPreviews[];
+  pageParams: unknown[];
+};
+
+function isPaginatedUserPreviews(
+  value: unknown
+): value is PaginatedUserPreviews {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'items' in value &&
+    Array.isArray((value as { items: unknown }).items)
+  );
+}
+
+function isInfiniteUserPreviews(
+  value: unknown
+): value is InfinitePaginatedUserPreviews {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'pages' in value &&
+    Array.isArray((value as { pages: unknown }).pages)
+  );
+}
+
 interface UseFollowUserOptions {
   invalidateOnSuccess?: boolean;
 }
@@ -37,20 +64,36 @@ export function useFollowUser(
   const optimisticUpdate = (targetUserId: string) => {
     setPendingUserId(targetUserId);
 
-    // getFollowers / getFollowing return paginated data ({ items, nextCursor, hasMore })
-    queryClient.setQueriesData<PaginatedUserPreviews>(
+    // getFollowers / getFollowing may use either plain useQuery
+    // ({ items, nextCursor, hasMore }) or useInfiniteQuery
+    // ({ pages: [{ items, ... }], pageParams }) cache shapes.
+    const mapItems = (items: UserPreview[]) =>
+      items.map((u) => togglePreview(targetUserId, u));
+
+    const updatePaginatedUsers = (old: unknown) => {
+      if (!old || typeof old !== 'object') return old;
+      if (isInfiniteUserPreviews(old)) {
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            items: mapItems(page.items),
+          })),
+        };
+      }
+      if (isPaginatedUserPreviews(old)) {
+        return { ...old, items: mapItems(old.items) };
+      }
+      return old;
+    };
+
+    queryClient.setQueriesData(
       { queryKey: followersKey },
-      (old) =>
-        old
-          ? { ...old, items: old.items.map((u) => togglePreview(targetUserId, u)) }
-          : old,
+      updatePaginatedUsers,
     );
-    queryClient.setQueriesData<PaginatedUserPreviews>(
+    queryClient.setQueriesData(
       { queryKey: followingKey },
-      (old) =>
-        old
-          ? { ...old, items: old.items.map((u) => togglePreview(targetUserId, u)) }
-          : old,
+      updatePaginatedUsers,
     );
 
     // getSuggestedUsers returns a flat UserPreview[]

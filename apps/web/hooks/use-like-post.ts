@@ -5,6 +5,29 @@ import { getQueryKey } from '@trpc/react-query';
 import { Post, PaginatedPosts } from '@repo/contracts/posts';
 import { trpc } from '@/lib/trpc/client';
 
+type InfinitePaginatedPosts = {
+  pages: PaginatedPosts[];
+  pageParams: unknown[];
+};
+
+function isPaginatedPosts(value: unknown): value is PaginatedPosts {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'items' in value &&
+    Array.isArray((value as { items: unknown }).items)
+  );
+}
+
+function isInfinitePosts(value: unknown): value is InfinitePaginatedPosts {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'pages' in value &&
+    Array.isArray((value as { pages: unknown }).pages)
+  );
+}
+
 export function useLikePost(postId: number) {
   const utils = trpc.useUtils();
   const queryClient = useQueryClient();
@@ -34,10 +57,10 @@ export function useLikePost(postId: number) {
       ]);
 
       const previousPost = utils.posts.findById.getData({ postId });
-      const previousAllQueries = queryClient.getQueriesData<PaginatedPosts>({
+      const previousAllQueries = queryClient.getQueriesData({
         queryKey: findAllQueryKey,
       });
-      const previousFeedQueries = queryClient.getQueriesData<PaginatedPosts>({
+      const previousFeedQueries = queryClient.getQueriesData({
         queryKey: feedQueryKey,
       });
 
@@ -47,22 +70,35 @@ export function useLikePost(postId: number) {
         return toggleLike(old);
       });
 
-      // Optimistic update on ALL findAll variants (feed, profile grid, etc.)
-      // findAll returns paginated data: { items: Post[], nextCursor, hasMore }
-      const updatePaginated = (old: PaginatedPosts | undefined) => {
-        if (!old) return old;
-        return {
-          ...old,
-          items: old.items.map((p) => (p.id === postId ? toggleLike(p) : p)),
-        };
+      // Optimistic update on ALL findAll/feed variants. Handles both the
+      // plain useQuery cache shape { items, nextCursor, hasMore } and the
+      // useInfiniteQuery cache shape { pages: [{ items, ... }], pageParams }.
+      const mapItems = (items: Post[]) =>
+        items.map((p) => (p.id === postId ? toggleLike(p) : p));
+
+      const updatePaginated = (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        if (isInfinitePosts(old)) {
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: mapItems(page.items),
+            })),
+          };
+        }
+        if (isPaginatedPosts(old)) {
+          return { ...old, items: mapItems(old.items) };
+        }
+        return old;
       };
 
-      queryClient.setQueriesData<PaginatedPosts>(
+      queryClient.setQueriesData(
         { queryKey: findAllQueryKey },
         updatePaginated,
       );
 
-      queryClient.setQueriesData<PaginatedPosts>(
+      queryClient.setQueriesData(
         { queryKey: feedQueryKey },
         updatePaginated,
       );
