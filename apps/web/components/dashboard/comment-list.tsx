@@ -7,7 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Comment } from '@repo/contracts/comments';
 
 import { Button } from '../ui/button';
-import UserAvatar from '../ui/user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 
 interface CommentListProps {
   comments: Comment[];

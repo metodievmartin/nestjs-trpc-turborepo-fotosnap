@@ -20,7 +20,7 @@ interface UserAvatarProps extends React.ComponentPropsWithoutRef<'div'> {
   iconClassName?: string;
 }
 
-export default function UserAvatar({
+export function UserAvatar({
   src,
   alt,
   size = 'sm',

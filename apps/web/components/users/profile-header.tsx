@@ -5,7 +5,7 @@ import { UserProfile } from '@repo/contracts/users';
 
 import { useLogout } from '@/hooks/use-logout';
 import { Button } from '@/components/ui/button';
-import UserAvatar from '@/components/ui/user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 import { ThemeToggle } from '@/components/providers/theme-toggle';
 import {
   DropdownMenu,

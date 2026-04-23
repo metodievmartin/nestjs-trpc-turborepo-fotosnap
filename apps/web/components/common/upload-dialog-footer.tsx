@@ -1,6 +1,7 @@
-import { DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { type ReactNode } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { DialogFooter } from '@/components/ui/dialog';
 
 interface UploadDialogFooterProps {
   onBack: () => void;
@@ -10,7 +11,7 @@ interface UploadDialogFooterProps {
   actionLabel: ReactNode;
 }
 
-export default function UploadDialogFooter({
+export function UploadDialogFooter({
   onBack,
   onAction,
   isUploading,

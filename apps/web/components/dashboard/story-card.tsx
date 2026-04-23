@@ -13,7 +13,7 @@ import { StoryGroup } from '@repo/contracts/stories';
 
 import { Button } from '../ui/button';
 import { getImageUrl } from '@/lib/media';
-import UserProfileLink from '../ui/user-profile-link';
+import { UserProfileLink } from '@/components/common/user-profile-link';
 import StoryProgressBar from './story-progress-bar';
 
 const STORY_DURATION_MS = 5000;

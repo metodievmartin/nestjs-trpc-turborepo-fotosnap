@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 
-import UserAvatar from '../ui/user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';

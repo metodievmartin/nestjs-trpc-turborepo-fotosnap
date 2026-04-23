@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-logout';
-import UserAvatar from '@/components/ui/user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 import type { ResolvedNavItem, ProfileNavItem } from '@/hooks/use-nav-items';
 
 interface DesktopSidebarProps {

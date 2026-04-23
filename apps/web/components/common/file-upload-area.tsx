@@ -1,16 +1,16 @@
 import { ImageIcon, Upload, X } from 'lucide-react';
 import { ChangeEvent, DragEvent, useRef } from 'react';
 
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface PhotoUploadAreaProps {
   onFileSelect: (file: File) => void;
   className?: string;
 }
 
-export default function FileUploadArea({
+export function FileUploadArea({
   onFileSelect,
   className = '',
 }: PhotoUploadAreaProps) {

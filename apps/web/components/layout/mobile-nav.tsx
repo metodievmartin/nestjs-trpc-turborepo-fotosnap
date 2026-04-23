@@ -3,7 +3,7 @@
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
-import UserAvatar from '@/components/ui/user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 import type { ResolvedNavItem, ProfileNavItem } from '@/hooks/use-nav-items';
 
 interface MobileNavProps {

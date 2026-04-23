@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface ImagePreviewProps {
   src: string;
@@ -13,7 +14,7 @@ interface ImagePreviewProps {
   onDismiss: () => void;
 }
 
-export default function ImagePreview({
+export function ImagePreview({
   src,
   alt = 'Preview',
   height,

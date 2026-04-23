@@ -12,7 +12,7 @@ import { PostLikesCount } from './post-likes-count';
 import { PostTimestamp } from './post-timestamp';
 import { PostOptionsMenu } from './post-options-menu';
 import { PostCommentsPreview } from './post-comments-preview';
-import UserProfileLink from '../ui/user-profile-link';
+import { UserProfileLink } from '@/components/common/user-profile-link';
 import { useLikePost } from '@/hooks/use-like-post';
 
 interface PostCardProps {

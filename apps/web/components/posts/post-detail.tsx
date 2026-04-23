@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { trpc } from '@/lib/trpc/client';
 import { getImageUrl } from '@/lib/media';
 import { Button } from '../ui/button';
-import UserProfileLink from '../ui/user-profile-link';
+import { UserProfileLink } from '@/components/common/user-profile-link';
 import { authClient } from '@/lib/auth/client';
 import PostActions from './post-actions';
 import { PostImage } from './post-image';

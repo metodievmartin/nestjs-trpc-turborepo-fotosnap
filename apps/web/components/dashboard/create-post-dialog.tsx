@@ -8,9 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import FileUploadArea from '@/components/ui/file-upload-area';
-import ImagePreview from '@/components/upload/image-preview';
-import UploadDialogFooter from '@/components/upload/upload-dialog-footer';
+import { ImagePreview } from '@/components/common/image-preview';
+import { FileUploadArea } from '@/components/common/file-upload-area';
+import { UploadDialogFooter } from '@/components/common/upload-dialog-footer';
 import { useMediaUpload } from '@/hooks/use-media-upload';
 
 interface CreatePostDialogProps {

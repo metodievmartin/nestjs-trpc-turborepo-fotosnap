@@ -3,7 +3,7 @@ import { Bookmark, Grid } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
 
-import EmptyState from './empty-state';
+import { EmptyState } from '@/components/common/empty-state';
 import { PostsGrid } from '@/components/users/post-grid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
-import UserAvatar from './user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 
 type AvatarSize = React.ComponentProps<typeof UserAvatar>['size'];
 
@@ -14,7 +14,7 @@ interface UserProfileLinkProps {
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
-export default function UserProfileLink({
+export function UserProfileLink({
   username,
   avatar,
   avatarSize = 'sm',

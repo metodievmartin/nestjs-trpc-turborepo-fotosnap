@@ -8,7 +8,7 @@ import { authClient, getSessionUsername } from '@/lib/auth/client';
 
 import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
-import UserAvatar from '../ui/user-avatar';
+import { UserAvatar } from '@/components/common/user-avatar';
 import { cn } from '@/lib/utils';
 import { useFollowUser } from '@/hooks/use-follow-user';
 import { useScrollFades } from '@/hooks/use-scroll-fades';

@@ -6,7 +6,7 @@ import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 
 import { Button } from '../ui/button';
-import UserProfileLink from '../ui/user-profile-link';
+import { UserProfileLink } from '@/components/common/user-profile-link';
 import { useFollowUser } from '@/hooks/use-follow-user';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 

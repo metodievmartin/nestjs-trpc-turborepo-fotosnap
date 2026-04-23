@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
-import FileUploadArea from '../ui/file-upload-area';
-import ImagePreview from '@/components/upload/image-preview';
-import UploadDialogFooter from '@/components/upload/upload-dialog-footer';
+import { ImagePreview } from '@/components/common/image-preview';
+import { FileUploadArea } from '@/components/common/file-upload-area';
+import { UploadDialogFooter } from '@/components/common/upload-dialog-footer';
 import { useMediaUpload } from '@/hooks/use-media-upload';
 
 interface StoryUploadProps {
