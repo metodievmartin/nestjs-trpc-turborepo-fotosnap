@@ -2,10 +2,9 @@ import { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
-import './globals.css';
-
-import { ThemeProvider } from '@/components/theme/theme-provider';
-import TrpcProvider from '@/components/trpc/trpc-provider';
+import '@/app/globals.css';
+import { TrpcProvider } from '@/components/providers/trpc-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

@@ -3,16 +3,16 @@ import { Camera, Edit, Globe, LogOut, Settings } from 'lucide-react';
 
 import { UserProfile } from '@repo/contracts/users';
 
+import { useLogout } from '@/hooks/use-logout';
+import { Button } from '@/components/ui/button';
+import UserAvatar from '@/components/ui/user-avatar';
+import { ThemeToggle } from '@/components/providers/theme-toggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
-import UserAvatar from '../ui/user-avatar';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { useLogout } from '@/hooks/use-logout';
+} from '@/components/ui/dropdown-menu';
 
 interface ProfileHeaderProps {
   profile: UserProfile;
