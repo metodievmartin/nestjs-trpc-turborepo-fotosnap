@@ -6,7 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { Comment } from '@repo/contracts/comments';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/common/user-avatar';
 
 interface CommentListProps {
@@ -15,7 +15,7 @@ interface CommentListProps {
   onDeleteComment: (commentId: number) => void;
 }
 
-export default function CommentList({
+export function CommentList({
   comments = [],
   currentUserId,
   onDeleteComment,

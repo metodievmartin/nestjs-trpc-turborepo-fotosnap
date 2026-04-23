@@ -1,14 +1,14 @@
+import { useMediaUpload } from '@/hooks/use-media-upload';
+import { ImagePreview } from '@/components/common/image-preview';
+import { FileUploadArea } from '@/components/common/file-upload-area';
+import { UploadDialogFooter } from '@/components/common/upload-dialog-footer';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { ImagePreview } from '@/components/common/image-preview';
-import { FileUploadArea } from '@/components/common/file-upload-area';
-import { UploadDialogFooter } from '@/components/common/upload-dialog-footer';
-import { useMediaUpload } from '@/hooks/use-media-upload';
+} from '@/components/ui/dialog';
 
 interface StoryUploadProps {
   open: boolean;
@@ -16,7 +16,7 @@ interface StoryUploadProps {
   onSubmit: (file: File) => Promise<void>;
 }
 
-export default function StoryUploadDialog({
+export function StoryUploadDialog({
   open,
   onOpenChange,
   onSubmit,

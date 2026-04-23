@@ -11,10 +11,10 @@ import { Pause, Play } from 'lucide-react';
 
 import { StoryGroup } from '@repo/contracts/stories';
 
-import { Button } from '../ui/button';
 import { getImageUrl } from '@/lib/media';
+import { Button } from '@/components/ui/button';
 import { UserProfileLink } from '@/components/common/user-profile-link';
-import StoryProgressBar from './story-progress-bar';
+import { StoryProgressBar } from '@/features/stories/components/story-progress-bar';
 
 const STORY_DURATION_MS = 5000;
 
@@ -34,7 +34,7 @@ interface StoryCardProps {
   onPreviousGroup: () => void;
 }
 
-export default function StoryCard({
+export function StoryCard({
   ref,
   storyGroup,
   isActive,

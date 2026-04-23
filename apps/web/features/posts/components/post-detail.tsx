@@ -9,9 +9,9 @@ import { trpc } from '@/lib/trpc/client';
 import { getImageUrl } from '@/lib/media';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth/client';
-import { useComments } from '@/hooks/use-comments';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
-import CommentList from '@/components/dashboard/comment-list';
+import { useComments } from '@/features/comments/hooks/use-comments';
+import { CommentList } from '@/features/comments/components/comment-list';
 import { useLikePost } from '@/features/posts/hooks/use-like-post';
 import { PostImage } from '@/features/posts/components/post-image';
 import { PostActions } from '@/features/posts/components/post-actions';
@@ -21,7 +21,7 @@ import { PostTimestamp } from '@/features/posts/components/post-timestamp';
 import { PostLikesCount } from '@/features/posts/components/post-likes-count';
 import { PostOptionsMenu } from '@/features/posts/components/post-options-menu';
 import { PostDetailSkeleton } from '@/features/posts/components/post-detail-skeleton';
-import CommentForm, { CommentFormHandle } from '@/components/dashboard/comment-form';
+import { CommentForm, CommentFormHandle } from '@/features/comments/components/comment-form';
 
 interface PostDetailProps {
   postId: number;

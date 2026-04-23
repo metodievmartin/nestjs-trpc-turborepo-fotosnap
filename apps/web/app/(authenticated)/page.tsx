@@ -1,8 +1,8 @@
 'use client';
 
 import { Feed } from '@/features/feed/components/feed';
-import Stories from '@/components/dashboard/stories';
 import { PageContainer } from '@/components/layout/page-container';
+import { Stories } from '@/features/stories/components/stories';
 
 export default function Home() {
   return (

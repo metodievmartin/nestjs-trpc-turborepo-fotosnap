@@ -3,8 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { StoryGroup } from '@repo/contracts/stories';
 
-import { Button } from '../ui/button';
-import StoryCard, { StoryCardHandle } from './story-card';
+import { Button } from '@/components/ui/button';
+import { StoryCard, StoryCardHandle } from '@/features/stories/components/story-card';
 
 const CARD_WIDTH = 400;
 const CARD_GAP = 16;
@@ -30,7 +30,7 @@ interface StoryCarouselProps {
   fetchNextPage?: () => unknown;
 }
 
-export default function StoryCarousel({
+export function StoryCarousel({
   storyGroups,
   currentGroupIndex,
   onGroupChange,

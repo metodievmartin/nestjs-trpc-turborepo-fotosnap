@@ -7,7 +7,7 @@ interface StoryProgressBarProps {
   onComplete: () => void;
 }
 
-export default function StoryProgressBar({
+export function StoryProgressBar({
   state,
   duration,
   paused,

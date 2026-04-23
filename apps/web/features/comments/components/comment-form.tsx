@@ -8,8 +8,8 @@ import {
   useState,
 } from 'react';
 
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export interface CommentFormHandle {
   focus: () => void;
@@ -20,7 +20,7 @@ interface CommentFormProps {
   borderless?: boolean;
 }
 
-const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(
+export const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(
   ({ onAddComment, borderless = false }, ref) => {
     const [commentText, setCommentText] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
@@ -69,5 +69,3 @@ const CommentForm = forwardRef<CommentFormHandle, CommentFormProps>(
 );
 
 CommentForm.displayName = 'CommentForm';
-
-export default CommentForm;

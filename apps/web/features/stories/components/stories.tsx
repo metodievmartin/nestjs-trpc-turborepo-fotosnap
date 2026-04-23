@@ -1,22 +1,21 @@
 import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 
-import { UserAvatar } from '@/components/common/user-avatar';
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 import { Button } from '@/components/ui/button';
-import StoryUploadDialog from '@/components/dashboard/story-upload-dialog';
-import { StoryViewer } from '@/components/dashboard/story-viewer';
-
-import { useCreateStory } from '@/hooks/use-create-story';
+import { UserAvatar } from '@/components/common/user-avatar';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import { useCreateStory } from '@/features/stories/hooks/use-create-story';
+import { StoryViewer } from '@/features/stories/components/story-viewer';
+import { StoryUploadDialog } from '@/features/stories/components/story-upload-dialog';
 
 type ViewerState =
   | { kind: 'closed' }
   | { kind: 'own' }
   | { kind: 'feed'; index: number };
 
-export default function Stories() {
+export function Stories() {
   const { data: ownStoryGroup } = trpc.stories.getOwnStories.useQuery();
   const feedStoriesQuery = trpc.feed.getStoryFeed.useInfiniteQuery(
     {},

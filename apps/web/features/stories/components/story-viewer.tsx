@@ -3,9 +3,9 @@ import { X } from 'lucide-react';
 
 import { StoryGroup } from '@repo/contracts/stories';
 
-import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
-import StoryCarousel from './story-carousel';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { StoryCarousel } from '@/features/stories/components/story-carousel';
 
 interface StoryViewerProps {
   storyGroups: StoryGroup[];
