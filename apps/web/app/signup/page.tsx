@@ -1,11 +1,12 @@
 'use client';
 
-import SignupForm from '@/components/auth/signup-form';
-import { SignupFormData } from '@/lib/auth/schema';
-import { authClient } from '@/lib/auth/client';
-import { getAuthErrorMessage } from '@/lib/auth/errors';
-import { useRouter } from 'next/dist/client/components/navigation';
+import { useRouter } from 'next/navigation';
 import { UseFormSetError } from 'react-hook-form';
+
+import { authClient } from '@/lib/auth/client';
+import { SignupFormData } from '@/lib/auth/schema';
+import { getAuthErrorMessage } from '@/lib/auth/errors';
+import { SignupForm } from '@/features/auth/components/signup-form';
 
 export default function SignupPage() {
   const router = useRouter();

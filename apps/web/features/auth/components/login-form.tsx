@@ -1,5 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, UseFormSetError } from 'react-hook-form';
+
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { LoginFormData, loginSchema } from '@/lib/auth/schema';
 import {
   Card,
   CardContent,
@@ -7,10 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useForm, UseFormSetError } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { SignupFormData, signupSchema } from '@/lib/auth/schema';
-import { useState } from 'react';
 import {
   Form,
   FormControl,
@@ -20,49 +23,44 @@ import {
   FormMessage,
   FormRootError,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
-interface SignupFormProps {
+interface LoginFormProps {
   onSubmit: (
-    data: SignupFormData,
-    setError: UseFormSetError<SignupFormData>
+    data: LoginFormData,
+    setError: UseFormSetError<LoginFormData>
   ) => Promise<void>;
 }
 
 const defaultValues = {
-  username: '',
   email: '',
   password: '',
-  confirmPassword: '',
 };
 
-export default function SignupForm({ onSubmit }: SignupFormProps) {
+export function LoginForm({ onSubmit }: LoginFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const form = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues,
   });
 
-  const handleFormSubmit = async (data: SignupFormData) => {
+  const handleFormSubmit = async (data: LoginFormData) => {
     if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       await onSubmit(data, form.setError);
     } catch (error) {
-      console.error('Error signing up:', error);
+      console.error('Error logging in:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Create Account</CardTitle>
+        <CardTitle>Sign In</CardTitle>
         <CardDescription>
-          Enter your information to create a new account
+          Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -72,25 +70,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             className="space-y-4"
           >
             <FormRootError />
-            <FormField
-              name="username"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Choose a username"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               name="email"
               control={form.control}
@@ -128,31 +107,12 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 </FormItem>
               )}
             />
-
-            <FormField
-              name="confirmPassword"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Confirm your password"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <Button
               type="submit"
               className="w-full cursor-pointer mt-4"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating account...' : 'Create account'}
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
         </Form>

@@ -5,7 +5,7 @@ import { Aperture, LogOut, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
-import { useLogout } from '@/hooks/use-logout';
+import { useLogout } from '@/features/auth/hooks/use-logout';
 import { UserAvatar } from '@/components/common/user-avatar';
 import type { ResolvedNavItem, ProfileNavItem } from '@/hooks/use-nav-items';
 

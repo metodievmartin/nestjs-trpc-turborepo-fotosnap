@@ -3,7 +3,7 @@ import { Camera, Edit, Globe, LogOut, Settings } from 'lucide-react';
 
 import { UserProfile } from '@repo/contracts/users';
 
-import { useLogout } from '@/hooks/use-logout';
+import { useLogout } from '@/features/auth/hooks/use-logout';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/common/user-avatar';
 import { ThemeToggle } from '@/components/providers/theme-toggle';
