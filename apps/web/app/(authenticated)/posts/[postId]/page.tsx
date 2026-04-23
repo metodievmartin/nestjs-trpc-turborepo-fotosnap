@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { PostDetail } from '@/components/posts/post-detail';
+import { PostDetail } from '@/features/posts/components/post-detail';
 
 export default function PostPage() {
   const params = useParams();

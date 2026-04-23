@@ -1,27 +1,27 @@
 'use client';
 
-import { useRef } from 'react';
 import Image from 'next/image';
+import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 import { trpc } from '@/lib/trpc/client';
 import { getImageUrl } from '@/lib/media';
-import { Button } from '../ui/button';
-import { UserProfileLink } from '@/components/common/user-profile-link';
+import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth/client';
-import PostActions from './post-actions';
-import { PostImage } from './post-image';
-import { PostCaption } from './post-caption';
-import { PostLikesCount } from './post-likes-count';
-import { PostTimestamp } from './post-timestamp';
-import { PostOptionsMenu } from './post-options-menu';
 import { useComments } from '@/hooks/use-comments';
-import { useLikePost } from '@/hooks/use-like-post';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
-import CommentList from '../dashboard/comment-list';
-import CommentForm, { CommentFormHandle } from '../dashboard/comment-form';
-import { PostDetailSkeleton } from './post-detail-skeleton';
+import CommentList from '@/components/dashboard/comment-list';
+import { useLikePost } from '@/features/posts/hooks/use-like-post';
+import { PostImage } from '@/features/posts/components/post-image';
+import { PostActions } from '@/features/posts/components/post-actions';
+import { PostCaption } from '@/features/posts/components/post-caption';
+import { UserProfileLink } from '@/components/common/user-profile-link';
+import { PostTimestamp } from '@/features/posts/components/post-timestamp';
+import { PostLikesCount } from '@/features/posts/components/post-likes-count';
+import { PostOptionsMenu } from '@/features/posts/components/post-options-menu';
+import { PostDetailSkeleton } from '@/features/posts/components/post-detail-skeleton';
+import CommentForm, { CommentFormHandle } from '@/components/dashboard/comment-form';
 
 interface PostDetailProps {
   postId: number;

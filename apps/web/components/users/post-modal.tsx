@@ -3,8 +3,8 @@
 import { XIcon } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 
-import { PostDetail } from '../posts/post-detail';
-import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
+import { PostDetail } from '@/features/posts/components/post-detail';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 interface PostModalProps {
   postId: number;

@@ -4,14 +4,14 @@ import { Fragment } from 'react';
 import { Loader2 } from 'lucide-react';
 
 import { trpc } from '@/lib/trpc/client';
-import PostCard from '@/components/posts/post-card';
-import { PostCardSkeleton } from '@/components/posts/post-card-skeleton';
-import { SuggestedUsers } from '@/components/users/suggested-users';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import { PostCard } from '@/features/posts/components/post-card';
+import { SuggestedUsers } from '@/components/users/suggested-users';
+import { PostCardSkeleton } from '@/features/posts/components/post-card-skeleton';
 
 const SUGGESTION_AFTER_POST = 2;
 
-export default function Feed() {
+export function Feed() {
   const {
     data,
     isLoading,

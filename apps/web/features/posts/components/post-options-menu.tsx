@@ -4,14 +4,13 @@ import { useRouter } from 'next/navigation';
 import { LinkIcon, ExternalLink, MoreHorizontal, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 interface PostOptionsMenuProps {
   postId: number;

@@ -2,7 +2,7 @@
 
 import { Bookmark, Heart, MessageCircle, Send } from 'lucide-react';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 
 interface PostActionsProps {
   isLiked?: boolean;
@@ -12,7 +12,7 @@ interface PostActionsProps {
   commentActive?: boolean;
 }
 
-export default function PostActions({
+export function PostActions({
   isLiked,
   isLiking,
   onLike,

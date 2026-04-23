@@ -2,11 +2,11 @@
 
 import { useState, type ReactNode } from 'react';
 
-import CreatePostDialog from '@/components/dashboard/create-post-dialog';
-import { useCreatePost } from '@/hooks/use-create-post';
 import { useNavItems } from '@/hooks/use-nav-items';
-import DesktopSidebar from './desktop-sidebar';
-import MobileNav from './mobile-nav';
+import MobileNav from '@/components/layout/mobile-nav';
+import DesktopSidebar from '@/components/layout/desktop-sidebar';
+import { useCreatePost } from '@/features/posts/hooks/use-create-post';
+import { CreatePostDialog } from '@/features/posts/components/create-post-dialog';
 
 interface AppShellProps {
   children: ReactNode;

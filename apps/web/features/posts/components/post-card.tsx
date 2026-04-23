@@ -5,21 +5,21 @@ import { useRouter } from 'next/navigation';
 
 import { Post } from '@repo/contracts/posts';
 
-import PostActions from './post-actions';
-import { PostImage } from './post-image';
-import { PostCaption } from './post-caption';
-import { PostLikesCount } from './post-likes-count';
-import { PostTimestamp } from './post-timestamp';
-import { PostOptionsMenu } from './post-options-menu';
-import { PostCommentsPreview } from './post-comments-preview';
+import { useLikePost } from '@/features/posts/hooks/use-like-post';
+import { PostImage } from '@/features/posts/components/post-image';
+import { PostActions } from '@/features/posts/components/post-actions';
+import { PostCaption } from '@/features/posts/components/post-caption';
 import { UserProfileLink } from '@/components/common/user-profile-link';
-import { useLikePost } from '@/hooks/use-like-post';
+import { PostTimestamp } from '@/features/posts/components/post-timestamp';
+import { PostLikesCount } from '@/features/posts/components/post-likes-count';
+import { PostOptionsMenu } from '@/features/posts/components/post-options-menu';
+import { PostCommentsPreview } from '@/features/posts/components/post-comments-preview';
 
 interface PostCardProps {
   post: Post;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export function PostCard({ post }: PostCardProps) {
   const router = useRouter();
   const { likePost, isLiking } = useLikePost(post.id);
   const detailHref = `/posts/${post.id}`;

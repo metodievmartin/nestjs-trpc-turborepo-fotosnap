@@ -1,6 +1,6 @@
 'use client';
 
-import Feed from '@/components/dashboard/feed';
+import { Feed } from '@/features/feed/components/feed';
 import Stories from '@/components/dashboard/stories';
 import { PageContainer } from '@/components/layout/page-container';
 

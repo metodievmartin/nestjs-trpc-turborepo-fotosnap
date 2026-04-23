@@ -19,7 +19,7 @@ interface CreatePostDialogProps {
   onSubmit: (file: File, caption: string) => Promise<void>;
 }
 
-export default function CreatePostDialog({
+export function CreatePostDialog({
   open,
   onOpenChange,
   onSubmit,
