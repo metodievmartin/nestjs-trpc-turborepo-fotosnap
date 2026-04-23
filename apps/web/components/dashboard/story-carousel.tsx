@@ -25,6 +25,9 @@ interface StoryCarouselProps {
   currentGroupIndex: number;
   onGroupChange: (index: number) => void;
   onClose: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => unknown;
 }
 
 export default function StoryCarousel({
@@ -32,6 +35,9 @@ export default function StoryCarousel({
   currentGroupIndex,
   onGroupChange,
   onClose,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
 }: StoryCarouselProps) {
   const viewportWidth = useSyncExternalStore(
     subscribeToResize,
@@ -62,6 +68,21 @@ export default function StoryCarousel({
     },
     [currentGroupIndex, onGroupChange]
   );
+
+  // Prefetch the next page of story groups when the viewer advances near
+  // the end, so auto-advance never hits a wall unless the server is done.
+  useEffect(() => {
+    if (!fetchNextPage || !hasNextPage || isFetchingNextPage) return;
+    if (currentGroupIndex >= storyGroups.length - 2) {
+      fetchNextPage();
+    }
+  }, [
+    currentGroupIndex,
+    storyGroups.length,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
 
   // Keyboard navigation
   useEffect(() => {

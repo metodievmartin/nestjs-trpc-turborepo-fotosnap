@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
 import { trpc } from '@/lib/trpc/client';
 import { getImageUrl } from '@/lib/media';
@@ -18,6 +18,7 @@ import { PostTimestamp } from './post-timestamp';
 import { PostOptionsMenu } from './post-options-menu';
 import { useComments } from '@/hooks/use-comments';
 import { useLikePost } from '@/hooks/use-like-post';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import CommentList from '../dashboard/comment-list';
 import CommentForm, { CommentFormHandle } from '../dashboard/comment-form';
 import { PostDetailSkeleton } from './post-detail-skeleton';
@@ -29,14 +30,36 @@ interface PostDetailProps {
 export function PostDetail({ postId }: PostDetailProps) {
   const router = useRouter();
   const { data: post, isLoading } = trpc.posts.findById.useQuery({ postId });
-  const { data: commentsData } = trpc.comments.findByPostId.useQuery({
-    postId,
-  });
-  const comments = commentsData?.items ?? [];
+  const commentsQuery = trpc.comments.findByPostId.useInfiniteQuery(
+    { postId },
+    {
+      getNextPageParam: (last) => last.nextCursor ?? undefined,
+      initialCursor: undefined,
+    }
+  );
+  const comments =
+    commentsQuery.data?.pages.flatMap((page) => page.items) ?? [];
   const { data: session } = authClient.useSession();
   const { likePost, isLiking } = useLikePost(postId);
   const { addComment, removeComment } = useComments(postId);
   const commentFormRef = useRef<CommentFormHandle>(null);
+
+  const desktopCommentsRef = useRef<HTMLDivElement | null>(null);
+
+  const mobileSentinelRef = useInfiniteScroll({
+    hasNextPage: commentsQuery.hasNextPage,
+    isFetchingNextPage: commentsQuery.isFetchingNextPage,
+    fetchNextPage: commentsQuery.fetchNextPage,
+    rootMargin: '200px 0px',
+  });
+
+  const desktopSentinelRef = useInfiniteScroll({
+    hasNextPage: commentsQuery.hasNextPage,
+    isFetchingNextPage: commentsQuery.isFetchingNextPage,
+    fetchNextPage: commentsQuery.fetchNextPage,
+    root: desktopCommentsRef,
+    rootMargin: '200px 0px',
+  });
 
   if (isLoading) {
     return <PostDetailSkeleton />;
@@ -136,6 +159,12 @@ export function PostDetail({ postId }: PostDetailProps) {
           currentUserId={session?.user?.id}
           onDeleteComment={removeComment}
         />
+        <div ref={mobileSentinelRef} aria-hidden="true" />
+        {commentsQuery.isFetchingNextPage && (
+          <div className="flex justify-center py-3">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
       </div>
 
       {/* Sticky comment input — sits above the mobile nav bar */}
@@ -177,12 +206,21 @@ export function PostDetail({ postId }: PostDetailProps) {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        <div
+          ref={desktopCommentsRef}
+          className="flex-1 overflow-y-auto px-4 py-3"
+        >
           <CommentList
             comments={comments}
             currentUserId={session?.user?.id}
             onDeleteComment={removeComment}
           />
+          <div ref={desktopSentinelRef} aria-hidden="true" />
+          {commentsQuery.isFetchingNextPage && (
+            <div className="flex justify-center py-3">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
 
         {commentInput}

@@ -1,11 +1,14 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
+
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 
 import { Button } from '../ui/button';
 import UserProfileLink from '../ui/user-profile-link';
 import { useFollowUser } from '@/hooks/use-follow-user';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 
 export type FollowListType = 'followers' | 'following';
 
@@ -17,21 +20,37 @@ interface FollowListProps {
 
 export function FollowList({ userId, username, type }: FollowListProps) {
   const { data: session } = authClient.useSession();
-  const { data: followersData } = trpc.users.getFollowers.useQuery(
+
+  const followersQuery = trpc.users.getFollowers.useInfiniteQuery(
     { userId },
-    { enabled: type === 'followers' }
+    {
+      enabled: type === 'followers',
+      getNextPageParam: (last) => last.nextCursor ?? undefined,
+      initialCursor: undefined,
+    }
   );
-  const { data: followingData } = trpc.users.getFollowing.useQuery(
+  const followingQuery = trpc.users.getFollowing.useInfiniteQuery(
     { userId },
-    { enabled: type === 'following' }
+    {
+      enabled: type === 'following',
+      getNextPageParam: (last) => last.nextCursor ?? undefined,
+      initialCursor: undefined,
+    }
   );
-  const followers = followersData?.items ?? [];
-  const following = followingData?.items ?? [];
+
+  const activeQuery = type === 'followers' ? followersQuery : followingQuery;
+  const users = activeQuery.data?.pages.flatMap((page) => page.items) ?? [];
+
   const { toggleFollow, pendingUserId } = useFollowUser(username, {
     invalidateOnSuccess: true,
   });
 
-  const users = type === 'followers' ? followers : following;
+  const sentinelRef = useInfiniteScroll({
+    hasNextPage: activeQuery.hasNextPage,
+    isFetchingNextPage: activeQuery.isFetchingNextPage,
+    fetchNextPage: activeQuery.fetchNextPage,
+    rootMargin: '200px 0px',
+  });
 
   if (users.length === 0) {
     return (
@@ -64,6 +83,12 @@ export function FollowList({ userId, username, type }: FollowListProps) {
           )}
         </div>
       ))}
+      <div ref={sentinelRef} aria-hidden="true" />
+      {activeQuery.isFetchingNextPage && (
+        <div className="flex justify-center py-2">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
     </div>
   );
 }

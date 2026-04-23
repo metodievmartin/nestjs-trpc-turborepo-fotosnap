@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Post } from '@repo/contracts/posts';
 
@@ -10,17 +11,18 @@ import { PostCaption } from './post-caption';
 import { PostLikesCount } from './post-likes-count';
 import { PostTimestamp } from './post-timestamp';
 import { PostOptionsMenu } from './post-options-menu';
+import { PostCommentsPreview } from './post-comments-preview';
 import UserProfileLink from '../ui/user-profile-link';
 import { useLikePost } from '@/hooks/use-like-post';
-import PostComments from '@/components/dashboard/post-comments';
 
 interface PostCardProps {
   post: Post;
 }
 
 export default function PostCard({ post }: PostCardProps) {
-  const [showComments, setShowComments] = useState(false);
+  const router = useRouter();
   const { likePost, isLiking } = useLikePost(post.id);
+  const detailHref = `/posts/${post.id}`;
 
   return (
     <article className="border">
@@ -45,8 +47,7 @@ export default function PostCard({ post }: PostCardProps) {
           isLiked={post.isLiked}
           isLiking={isLiking}
           onLike={likePost}
-          onComment={() => setShowComments((prev) => !prev)}
-          commentActive={showComments}
+          onComment={() => router.push(detailHref)}
         />
 
         <PostLikesCount likes={post.likes} />
@@ -54,21 +55,18 @@ export default function PostCard({ post }: PostCardProps) {
         <PostCaption username={post.user.username} caption={post.caption} />
 
         {post.comments > 0 && (
-          <button
-            onClick={() => setShowComments((prev) => !prev)}
-            className="text-sm text-muted-foreground cursor-pointer"
-          >
-            View all {post.comments} comments
-          </button>
+          <>
+            <Link
+              href={detailHref}
+              className="text-sm text-muted-foreground hover:opacity-80 block"
+            >
+              View all {post.comments} comments
+            </Link>
+            <PostCommentsPreview postId={post.id} />
+          </>
         )}
 
         <PostTimestamp timestamp={post.timestamp} />
-
-        {showComments && (
-          <div className="pt-4 border-t">
-            <PostComments postId={post.id} />
-          </div>
-        )}
       </div>
     </article>
   );

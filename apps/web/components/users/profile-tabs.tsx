@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Bookmark, Grid } from 'lucide-react';
 
 import { Post } from '@repo/contracts/posts';
@@ -10,14 +11,18 @@ interface ProfileTabsProps {
   userPosts: Post[];
   savedPosts: Post[];
   username: string;
+  isOwnProfile: boolean;
   onPostClick?: (post: Post) => void;
+  postsFooter?: ReactNode;
 }
 
 export function ProfileTabs({
   userPosts,
   savedPosts,
   username,
+  isOwnProfile,
   onPostClick,
+  postsFooter,
 }: ProfileTabsProps) {
   return (
     <Tabs defaultValue="posts" className="w-full">
@@ -26,10 +31,12 @@ export function ProfileTabs({
           <Grid className="h-3.5 w-3.5" />
           POSTS
         </TabsTrigger>
-        <TabsTrigger value="saved" className="gap-2">
-          <Bookmark className="h-3.5 w-3.5" />
-          SAVED
-        </TabsTrigger>
+        {isOwnProfile && (
+          <TabsTrigger value="saved" className="gap-2">
+            <Bookmark className="h-3.5 w-3.5" />
+            SAVED
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <TabsContent value="posts" className="mt-2">
@@ -42,18 +49,21 @@ export function ProfileTabs({
         ) : (
           <PostsGrid posts={userPosts} onPostClick={onPostClick} />
         )}
+        {postsFooter}
       </TabsContent>
-      <TabsContent value="saved" className="mt-2">
-        {savedPosts.length === 0 ? (
-          <EmptyState
-            icon={Bookmark}
-            title="No Saved Posts"
-            description={`Save photos and videos to see them here`}
-          />
-        ) : (
-          <PostsGrid posts={savedPosts} onPostClick={onPostClick} />
-        )}
-      </TabsContent>
+      {isOwnProfile && (
+        <TabsContent value="saved" className="mt-2">
+          {savedPosts.length === 0 ? (
+            <EmptyState
+              icon={Bookmark}
+              title="No Saved Posts"
+              description={`Save photos and videos to see them here`}
+            />
+          ) : (
+            <PostsGrid posts={savedPosts} onPostClick={onPostClick} />
+          )}
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

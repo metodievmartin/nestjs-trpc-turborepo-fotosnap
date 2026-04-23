@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import UserAvatar from '../ui/user-avatar';
@@ -9,6 +9,7 @@ import StoryUploadDialog from '@/components/dashboard/story-upload-dialog';
 import { StoryViewer } from '@/components/dashboard/story-viewer';
 
 import { useCreateStory } from '@/hooks/use-create-story';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 
 type ViewerState =
   | { kind: 'closed' }
@@ -17,16 +18,35 @@ type ViewerState =
 
 export default function Stories() {
   const { data: ownStoryGroup } = trpc.stories.getOwnStories.useQuery();
-  const { data: feedStoriesData } = trpc.feed.getStoryFeed.useQuery({});
-  const otherStoryGroups = feedStoriesData?.items ?? [];
+  const feedStoriesQuery = trpc.feed.getStoryFeed.useInfiniteQuery(
+    {},
+    {
+      getNextPageParam: (last) => last.nextCursor ?? undefined,
+      initialCursor: undefined,
+    }
+  );
+  const usersStoryGroups =
+    feedStoriesQuery.data?.pages.flatMap((page) => page.items) ?? [];
   const { createStory } = useCreateStory();
   const { data: session } = authClient.useSession();
   const [showCreateStory, setShowCreateStory] = useState(false);
   const [viewer, setViewer] = useState<ViewerState>({ kind: 'closed' });
 
+  const stripRef = useRef<HTMLDivElement | null>(null);
+  const stripSentinelRef = useInfiniteScroll({
+    hasNextPage: feedStoriesQuery.hasNextPage,
+    isFetchingNextPage: feedStoriesQuery.isFetchingNextPage,
+    fetchNextPage: feedStoriesQuery.fetchNextPage,
+    root: stripRef,
+    rootMargin: '0px 200px 0px 0px',
+  });
+
   return (
     <div className="border-b py-4">
-      <div className="flex space-x-6 overflow-x-auto scrollbar-hide">
+      <div
+        ref={stripRef}
+        className="flex space-x-6 overflow-x-auto scrollbar-hide"
+      >
         <div className="flex flex-col items-center space-y-1 shrink-0">
           <div className="relative">
             <div
@@ -65,7 +85,7 @@ export default function Stories() {
           </span>
         </div>
 
-        {otherStoryGroups.map((storyGroup, index) => (
+        {usersStoryGroups.map((storyGroup, index) => (
           <div
             key={storyGroup.userId}
             className="flex flex-col items-center space-y-1 shrink-0 cursor-pointer"
@@ -87,6 +107,8 @@ export default function Stories() {
             </span>
           </div>
         ))}
+
+        <div ref={stripSentinelRef} aria-hidden="true" className="shrink-0" />
       </div>
 
       <StoryUploadDialog
@@ -98,11 +120,16 @@ export default function Stories() {
       {viewer.kind !== 'closed' && (
         <StoryViewer
           storyGroups={
-            viewer.kind === 'own' ? [ownStoryGroup!] : otherStoryGroups
+            viewer.kind === 'own' ? [ownStoryGroup!] : usersStoryGroups
           }
           initialGroupIndex={viewer.kind === 'feed' ? viewer.index : 0}
           open
           onOpenChange={() => setViewer({ kind: 'closed' })}
+          {...(viewer.kind === 'feed' && {
+            hasNextPage: feedStoriesQuery.hasNextPage,
+            isFetchingNextPage: feedStoriesQuery.isFetchingNextPage,
+            fetchNextPage: feedStoriesQuery.fetchNextPage,
+          })}
         />
       )}
     </div>
