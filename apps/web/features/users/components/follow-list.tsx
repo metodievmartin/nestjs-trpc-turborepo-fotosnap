@@ -5,10 +5,10 @@ import { Loader2 } from 'lucide-react';
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 
-import { Button } from '../ui/button';
-import { UserProfileLink } from '@/components/common/user-profile-link';
-import { useFollowUser } from '@/hooks/use-follow-user';
+import { Button } from '@/components/ui/button';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import { useFollowUser } from '@/features/users/hooks/use-follow-user';
+import { UserProfileLink } from '@/components/common/user-profile-link';
 
 export type FollowListType = 'followers' | 'following';
 

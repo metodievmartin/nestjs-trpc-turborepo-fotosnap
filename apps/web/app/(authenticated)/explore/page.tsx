@@ -4,7 +4,7 @@ import { Search, TrendingUp, Compass } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/layout/page-container';
-import { SuggestedUsers } from '@/components/users/suggested-users';
+import { SuggestedUsers } from '@/features/users/components/suggested-users';
 
 export default function ExplorePage() {
   return (

@@ -7,17 +7,17 @@ import { Loader2 } from 'lucide-react';
 import { trpc } from '@/lib/trpc/client';
 import { authClient } from '@/lib/auth/client';
 
-import { useFollowUser } from '@/hooks/use-follow-user';
-import { useUpdateProfile } from '@/hooks/use-update-profile';
-import { useUpdateAvatar } from '@/hooks/use-update-avatar';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
-import ProfileHeader from '@/components/users/profile-header';
-import { ProfileTabs } from '@/components/users/profile-tabs';
-import { PostModal } from '@/components/users/post-modal';
-import { EditProfileModal } from '@/components/dashboard/edit-profile-modal';
-import AvatarUploadDialog from '@/components/dashboard/avatar-upload-dialog';
 import { PageContainer } from '@/components/layout/page-container';
-import { ProfilePageSkeleton } from '@/components/users/profile-page-skeleton';
+import { useFollowUser } from '@/features/users/hooks/use-follow-user';
+import ProfileHeader from '@/features/profile/components/profile-header';
+import { PostModal } from '@/features/profile/components/post-modal';
+import { ProfileTabs } from '@/features/profile/components/profile-tabs';
+import { useUpdateProfile } from '@/features/profile/hooks/use-update-profile';
+import { useUpdateAvatar } from '@/features/profile/hooks/use-update-avatar';
+import { EditProfileModal } from '@/features/profile/components/edit-profile-modal';
+import AvatarUploadDialog from '@/features/profile/components/avatar-upload-dialog';
+import { ProfilePageSkeleton } from '@/features/profile/components/profile-page-skeleton';
 
 export default function ProfilePage() {
   const params = useParams();

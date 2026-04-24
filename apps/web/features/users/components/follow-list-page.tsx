@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 import { trpc } from '@/lib/trpc/client';
 import { Button } from '@/components/ui/button';
-import { FollowList } from '@/components/users/follow-list';
+import { FollowList } from '@/features/users/components/follow-list';
 import { PageContainer } from '@/components/layout/page-container';
 
 interface FollowListPageProps {

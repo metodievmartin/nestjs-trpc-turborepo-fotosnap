@@ -4,8 +4,8 @@ import { Bookmark, Grid } from 'lucide-react';
 import { Post } from '@repo/contracts/posts';
 
 import { EmptyState } from '@/components/common/empty-state';
-import { PostsGrid } from '@/components/users/post-grid';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PostsGrid } from '@/features/profile/components/post-grid';
 
 interface ProfileTabsProps {
   userPosts: Post[];

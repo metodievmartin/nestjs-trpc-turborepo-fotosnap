@@ -6,12 +6,12 @@ import Link from 'next/link';
 import { trpc } from '@/lib/trpc/client';
 import { authClient, getSessionUsername } from '@/lib/auth/client';
 
-import { Button } from '../ui/button';
-import { Skeleton } from '../ui/skeleton';
-import { UserAvatar } from '@/components/common/user-avatar';
 import { cn } from '@/lib/utils';
-import { useFollowUser } from '@/hooks/use-follow-user';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { UserAvatar } from '@/components/common/user-avatar';
 import { useScrollFades } from '@/hooks/use-scroll-fades';
+import { useFollowUser } from '@/features/users/hooks/use-follow-user';
 
 interface SuggestedUsersProps {
   title?: string;

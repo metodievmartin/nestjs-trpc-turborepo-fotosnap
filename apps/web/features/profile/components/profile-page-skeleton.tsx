@@ -1,5 +1,5 @@
-import { Skeleton } from '../ui/skeleton';
-import { PageContainer } from '../layout/page-container';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PageContainer } from '@/components/layout/page-container';
 
 export function ProfilePageSkeleton() {
   return (

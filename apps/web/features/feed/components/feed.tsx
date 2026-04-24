@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { trpc } from '@/lib/trpc/client';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import { PostCard } from '@/features/posts/components/post-card';
-import { SuggestedUsers } from '@/components/users/suggested-users';
+import { SuggestedUsers } from '@/features/users/components/suggested-users';
 import { PostCardSkeleton } from '@/features/posts/components/post-card-skeleton';
 
 const SUGGESTION_AFTER_POST = 2;
